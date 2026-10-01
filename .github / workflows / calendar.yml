@@ -2,8 +2,8 @@ name: Nieuwskalender bijwerken
 
 on:
   schedule:
-    - cron: "17 */3 * * *"   # elke 3 uur
-  workflow_dispatch:          # handmatig starten via de knop "Run workflow"
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Kalender ophalen (Forex Factory, deze week)
+      - name: Kalender ophalen
         run: |
           curl -fsSL -A "Mozilla/5.0 (risk-desk calendar)" \
             https://nfs.faireconomy.media/ff_calendar_thisweek.json -o calendar.new.json
