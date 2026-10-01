@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="nl">
+<html lang="nl" data-theme="dark" data-sym="XAU">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Alpha Risk Desk</title>
-<meta name="theme-color" content="#12161d">
+<meta name="theme-color" content="#0e1116">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,429 +12,779 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: single mobile-first column — account status strip, trade ticket, result slip, settings drawer */
+/* Layout: sticky status header · tab content · fixed result dock (Trade tab) · fixed bottom nav */
 :root{
-  --bg:#eef0f3; --panel:#ffffff; --panel-2:#f5f6f8; --line:#d9dde4;
-  --fg:#1b2230; --muted:#5d6678; --gold:#a8791d; --gold-soft:#f3e8cf;
-  --good:#1f7a4d; --warn:#b26a00; --bad:#b3261e;
-  --good-soft:#e2f2e9; --warn-soft:#fbefd9; --bad-soft:#f8e1df;
-  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
-  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r:10px;
+  --bg:#0e1116; --surface:#161a21; --surface-2:#1d222b; --line:#262c37; --fg:#e8ebf0; --muted:#8b94a3;
+  --acc:#e3b341; --acc-ink:#1a1405; --acc-soft:rgba(227,179,65,.14);
+  --good:#3fcf8e; --warn:#f2a93b; --bad:#ff6b5e;
+  --good-soft:rgba(63,207,142,.13); --warn-soft:rgba(242,169,59,.14); --bad-soft:rgba(255,107,94,.14);
+  --f-ui:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:14px; --nav-h:62px; --dock-h:92px;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12161d; --panel:#1a2029; --panel-2:#212835; --line:#2e3746;
-  --fg:#e7eaf0; --muted:#98a2b3; --gold:#e0b458; --gold-soft:#3a3120;
-  --good:#5cc98f; --warn:#f0b04a; --bad:#f07a70;
-  --good-soft:#18342a; --warn-soft:#3a2d15; --bad-soft:#3d1f1d; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12161d; --panel:#1a2029; --panel-2:#212835; --line:#2e3746;
-  --fg:#e7eaf0; --muted:#98a2b3; --gold:#e0b458; --gold-soft:#3a3120;
-  --good:#5cc98f; --warn:#f0b04a; --bad:#f07a70;
-  --good-soft:#18342a; --warn-soft:#3a2d15; --bad-soft:#3d1f1d; color-scheme:dark}
-*{box-sizing:border-box}
-html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg)}
-body{margin:0;-webkit-text-size-adjust:100%}
+:root[data-sym="EUR"]{--acc:#5b9bff; --acc-ink:#04122b; --acc-soft:rgba(91,155,255,.15)}
+:root[data-theme="light"]{
+  --bg:#f3f4f7; --surface:#ffffff; --surface-2:#f0f2f5; --line:#e1e4ea; --fg:#141821; --muted:#5f6878;
+  --good:#12935b; --warn:#b86e00; --bad:#d23a2e;
+  --good-soft:#e3f5ec; --warn-soft:#fdf0dc; --bad-soft:#fde6e3; color-scheme:light}
+:root[data-theme="light"]{--acc:#b7861a; --acc-ink:#fff; --acc-soft:rgba(183,134,26,.12)}
+:root[data-theme="light"][data-sym="EUR"]{--acc:#2f6fe0; --acc-ink:#fff; --acc-soft:rgba(47,111,224,.12)}
+@media (prefers-color-scheme: light){
+  :root[data-theme="auto"]{--bg:#f3f4f7; --surface:#ffffff; --surface-2:#f0f2f5; --line:#e1e4ea; --fg:#141821; --muted:#5f6878;
+    --good:#12935b; --warn:#b86e00; --bad:#d23a2e; --good-soft:#e3f5ec; --warn-soft:#fdf0dc; --bad-soft:#fde6e3; color-scheme:light;
+    --acc:#b7861a; --acc-ink:#fff; --acc-soft:rgba(183,134,26,.12)}
+  :root[data-theme="auto"][data-sym="EUR"]{--acc:#2f6fe0; --acc-soft:rgba(47,111,224,.12)}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-ui);font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 16px)}
+body.tab-trade{padding-bottom:calc(var(--nav-h) + var(--dock-h) + env(safe-area-inset-bottom,0px) + 20px)}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;padding:16px;padding-block:16px 40px}
-.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-header{display:flex;flex-direction:column;gap:6px}
-h1{font-family:var(--f-display);font-weight:700;font-size:1.7rem;letter-spacing:.01em;margin:0;text-wrap:balance}
-.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.chip{font-family:var(--f-mono);font-size:.74rem;padding:3px 8px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.chip.ok{color:var(--good)} .chip.off{color:var(--warn)}
-.chip.gold{background:var(--gold-soft);border-color:transparent;color:var(--gold);font-weight:600}
-.lbl{font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--muted)}
-section{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
-section h2{font-family:var(--f-display);font-weight:600;font-size:1.05rem;margin:0;letter-spacing:.02em}
-.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-.field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field label{font-size:.78rem;color:var(--muted)}
-input[type=text]{font-family:var(--f-mono);font-size:1rem;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--fg);width:100%;font-variant-numeric:tabular-nums}
-input[type=text]:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
-.seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px}
-.seg button{flex:1;font-family:var(--f-display);font-weight:600;font-size:.95rem;letter-spacing:.03em;border:0;background:transparent;color:var(--muted);padding:8px 6px;border-radius:6px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.seg.gold button[aria-pressed="true"]{background:var(--gold);color:var(--panel)}
-.presets{display:flex;gap:6px;flex-wrap:wrap}
-.presets button{font-family:var(--f-mono);font-size:.82rem;border:1px solid var(--line);background:var(--panel-2);color:var(--fg);padding:6px 10px;border-radius:999px;cursor:pointer}
-.presets button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);font-weight:600}
-.btn-ghost{font-family:var(--f-body);font-size:.8rem;border:1px dashed var(--line);background:transparent;color:var(--muted);padding:6px 10px;border-radius:8px;cursor:pointer}
-/* status meters */
-.meters{display:flex;flex-direction:column;gap:10px}
-.meter{display:flex;flex-direction:column;gap:4px}
-.meter .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.meter .val{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums}
-.bar{height:8px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
-.bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)} .bar i.gold{background:var(--gold)}
-.sub{font-size:.76rem;color:var(--muted);font-family:var(--f-mono)}
-/* result slip */
-.slip{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.slip .hero{padding:16px 14px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px dashed var(--line);flex-wrap:wrap}
-.lots{font-family:var(--f-mono);font-weight:600;font-size:2.8rem;line-height:1;font-variant-numeric:tabular-nums}
-.lots small{font-size:1rem;color:var(--muted);font-weight:500;margin-left:4px}
-.dir{font-family:var(--f-display);font-weight:700;font-size:.9rem;letter-spacing:.08em;padding:4px 10px;border-radius:6px}
-.dir.long{background:var(--good-soft);color:var(--good)} .dir.short{background:var(--bad-soft);color:var(--bad)} .dir.none{background:var(--panel-2);color:var(--muted)}
-dl{margin:0;display:grid;grid-template-columns:1fr auto;padding:6px 14px 12px}
-dl dt,dl dd{padding:7px 0;border-bottom:1px solid var(--line);margin:0}
-dl dt{color:var(--muted);font-size:.88rem}
-dl dd{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums;font-size:.92rem}
-dl dt:nth-last-child(2),dl dd:last-child{border-bottom:0}
-.alerts{display:flex;flex-direction:column;gap:6px;padding:0 14px 14px}
-.alert{font-size:.86rem;padding:8px 10px;border-radius:8px;border-left:3px solid}
-.alert.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--fg)}
-.alert.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--fg)}
-.alert.ok{background:var(--good-soft);border-color:var(--good);color:var(--fg)}
-details{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:0 14px}
-summary{cursor:pointer;padding:12px 0;font-family:var(--f-display);font-weight:600;letter-spacing:.02em}
-details[open]{padding-bottom:14px}
-details .inner{display:flex;flex-direction:column;gap:12px}
-.rules{font-size:.84rem;color:var(--muted);margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
-.foot{font-size:.76rem;color:var(--muted);text-align:center}
+button{font-family:inherit;color:inherit}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+/* Header */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;max-width:560px;margin:0 auto}
+.brand{font-weight:700;font-size:1.02rem;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+.reset{font-family:var(--f-num);font-size:.72rem;color:var(--muted)}
+.gauges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:560px;margin:10px auto 0}
+.g{background:var(--surface);border-radius:10px;padding:8px 10px;min-width:0}
+.g .k{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g .v{font-family:var(--f-num);font-weight:600;font-size:.92rem;margin:2px 0 6px;white-space:nowrap}
+.track{height:4px;border-radius:9px;background:var(--surface-2);overflow:hidden}
+.track b{display:block;height:100%;width:0;background:var(--good);border-radius:9px;transition:width .35s ease,background .2s}
+.track b.warn{background:var(--warn)} .track b.bad{background:var(--bad)} .track b.acc{background:var(--acc)}
+
+main{max-width:560px;margin:0 auto;padding:14px 16px 0;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.card h2{margin:0;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.lbl{font-size:.76rem;color:var(--muted)}
 .hint{font-size:.76rem;color:var(--muted)}
-@media (max-width:380px){.row.three{grid-template-columns:repeat(2,minmax(0,1fr))}.lots{font-size:2.3rem}}
-@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+/* Inputs */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+input[type=text]{font-family:var(--f-num);font-size:1.05rem;padding:12px;border-radius:10px;border:1px solid transparent;background:var(--surface-2);color:var(--fg);width:100%;font-variant-numeric:tabular-nums;transition:border-color .15s}
+input[type=text]:focus{outline:none;border-color:var(--acc)}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 6px;border-radius:9px;font-weight:600;font-size:.92rem;cursor:pointer;transition:background .15s,color .15s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.seg.sym button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:transparent;color:var(--fg);font-family:var(--f-num);font-size:.82rem;padding:7px 11px;border-radius:99px;cursor:pointer}
+.pill[aria-pressed="true"]{border-color:var(--acc);background:var(--acc-soft);color:var(--acc);font-weight:600}
+.inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:11px;padding:12px 14px;font-weight:600;font-size:.94rem;cursor:pointer;background:var(--surface-2);color:var(--fg)}
+.btn.acc{background:var(--acc);color:var(--acc-ink)}
+.btn.ghost{background:transparent;border:1px dashed var(--line);color:var(--muted);font-weight:500;font-size:.84rem;padding:9px 12px}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn:disabled{opacity:.45}
+
+/* News banner */
+.news{display:flex;gap:10px;align-items:center;border-radius:12px;padding:10px 12px;background:var(--surface);font-size:.86rem}
+.news .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--muted)}
+.news.bad{background:var(--bad-soft)} .news.bad .dot{background:var(--bad);animation:pulse 1.4s infinite}
+.news.warn{background:var(--warn-soft)} .news.warn .dot{background:var(--warn)}
+.news.ok .dot{background:var(--good)}
+.news b{font-weight:600}
+@keyframes pulse{50%{opacity:.35}}
+
+/* Details list */
+dl{margin:0;display:grid;grid-template-columns:1fr auto}
+dt,dd{margin:0;padding:9px 0;border-bottom:1px solid var(--line)}
+dt{color:var(--muted);font-size:.88rem}
+dd{font-family:var(--f-num);text-align:right;font-size:.9rem;font-variant-numeric:tabular-nums}
+dl>:nth-last-child(-n+2){border-bottom:0}
+.alerts{display:flex;flex-direction:column;gap:6px}
+.alert{font-size:.85rem;padding:9px 11px;border-radius:10px}
+.alert.bad{background:var(--bad-soft);color:var(--fg)} .alert.bad::before{content:"● ";color:var(--bad)}
+.alert.warn{background:var(--warn-soft);color:var(--fg)} .alert.warn::before{content:"● ";color:var(--warn)}
+.alert.ok{background:var(--good-soft);color:var(--fg)} .alert.ok::before{content:"● ";color:var(--good)}
+details.card{gap:0}
+details.card summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:.95rem}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::after{content:"+";font-family:var(--f-num);color:var(--muted);font-size:1.2rem}
+details.card[open] summary::after{content:"–"}
+details.card .body{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+
+/* Result dock */
+.dock{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));z-index:25;padding:0 12px 8px;pointer-events:none}
+.dock-in{pointer-events:auto;max-width:536px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:border-color .2s,background .2s}
+.dock-in.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--surface))}
+.dock-in.warn{border-color:var(--warn)}
+.dock-in.ok{border-color:color-mix(in srgb,var(--good) 55%,var(--line))}
+.lots{border:0;background:transparent;padding:0;text-align:left;cursor:pointer;display:flex;flex-direction:column}
+.lots .k{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.lots .v{font-family:var(--f-num);font-weight:600;font-size:2rem;line-height:1.05;letter-spacing:-.02em}
+.lots .v small{font-size:.8rem;color:var(--muted);font-weight:500;margin-left:3px}
+.dock-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:.8rem;color:var(--muted)}
+.dock-mid .num{color:var(--fg)}
+.dock-mid span{white-space:nowrap}
+.seg button{white-space:nowrap}
+.dir{font-size:.7rem;font-weight:700;letter-spacing:.06em;padding:3px 7px;border-radius:6px;align-self:flex-start}
+.dir.long{background:var(--good-soft);color:var(--good)} .dir.short{background:var(--bad-soft);color:var(--bad)} .dir.none{background:var(--surface-2);color:var(--muted)}
+.dock .btn{padding:11px 12px;font-size:.85rem}
+
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);height:var(--nav-h)}
+nav.tabs button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.72rem;font-weight:500;color:var(--muted);cursor:pointer;position:relative}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-selected="true"]{color:var(--acc)}
+nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:8px;border-radius:50%;background:var(--bad)}
+
+/* Lock */
+.lock{background:var(--bad-soft);border:1px solid var(--bad);border-radius:var(--r);padding:20px 16px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.lock h3{margin:0;font-size:1.25rem;color:var(--bad)}
+.lock p{margin:0;font-size:.9rem}
+.hold{position:relative;overflow:hidden}
+.hold i{position:absolute;inset:0;width:0;background:var(--bad-soft);transition:none}
+
+/* News list */
+.day h3{margin:4px 0 6px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.ev{display:grid;grid-template-columns:48px 44px 1fr;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.ev:last-child{border-bottom:0}
+.ev.past{opacity:.45}
+.ev.now{background:var(--bad-soft);border-radius:8px;padding-inline:6px}
+.cur{font-family:var(--f-num);font-size:.72rem;font-weight:600;padding:3px 0;border-radius:6px;background:var(--surface-2);text-align:center}
+.ev .t{font-family:var(--f-num)}
+.ev .sub{display:block;font-size:.74rem;color:var(--muted)}
+.tag{font-family:var(--f-num);font-size:.66rem;padding:1px 5px;border-radius:4px;background:var(--acc-soft);color:var(--acc);margin-left:4px}
+
+/* Log */
+.log{display:flex;flex-direction:column}
+.lr{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.lr:last-child{border-bottom:0}
+.lr .pl.pos{color:var(--good)} .lr .pl.neg{color:var(--bad)}
+.x{border:0;background:transparent;color:var(--muted);font-size:1rem;cursor:pointer;padding:4px 6px}
+.rules{margin:0;padding-left:18px;font-size:.84rem;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+
+/* Sheet + toast */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--surface);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px;animation:up .22s ease}
+.sheet h3{margin:0;font-size:1.05rem}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.res3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.res3 button{border:1px solid var(--line);background:var(--surface-2);border-radius:11px;padding:12px 6px;font-weight:600;cursor:pointer}
+.res3 button[aria-pressed="true"].w{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+.res3 button[aria-pressed="true"].l{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.res3 button[aria-pressed="true"].b{border-color:var(--acc);color:var(--acc);background:var(--acc-soft)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:50;background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:99px;font-size:.85rem;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+@media (max-width:370px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.lots .v{font-size:1.7rem}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
+<body class="tab-trade">
 
-<div class="wrap">
-  <header>
-    <h1>Alpha Risk Desk</h1>
-    <div class="meta">
-      <span class="chip gold" id="chipPlan">Alpha Pro 8% · $10K</span>
-      <span class="chip" id="chipPhase">Fase 1 · evaluatie</span>
-      <span class="chip" id="chipReset">Dagreset …</span>
-    </div>
-  </header>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><i></i>Risk Desk</div>
+    <div class="reset" id="resetTxt">Dagreset –</div>
+  </div>
+  <div class="gauges">
+    <div class="g"><div class="k">Dagruimte</div><div class="v" id="gDay">–</div><div class="track"><b id="gDayBar"></b></div></div>
+    <div class="g"><div class="k">Max DD</div><div class="v" id="gMax">–</div><div class="track"><b id="gMaxBar"></b></div></div>
+    <div class="g"><div class="k" id="gTgtK">Doel F1</div><div class="v" id="gTgt">–</div><div class="track"><b id="gTgtBar" class="acc"></b></div></div>
+  </div>
+</header>
 
-  <!-- ACCOUNT STATUS -->
-  <section aria-labelledby="hAcc">
-    <h2 id="hAcc">Account vandaag</h2>
-    <div class="row three">
-      <div class="field"><label for="bal">Balance nu</label><input type="text" id="bal" inputmode="decimal" value="10000"></div>
-      <div class="field"><label for="dayStart">Balance bij dagreset</label><input type="text" id="dayStart" inputmode="decimal" value="10000"></div>
-      <div class="field"><label for="openPL">Open P/L</label><input type="text" id="openPL" inputmode="decimal" value="0"></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn-ghost" id="newDay" type="button">Nieuwe dag: dagstart = balance nu</button>
-      <span class="hint" id="exampleNote">Voorbeeldwaarden, vul je eigen stand in.</span>
-    </div>
-    <div class="meters">
-      <div class="meter">
-        <div class="top"><span class="lbl">Ruimte tot dagelijkse limiet (4%)</span><span class="val" id="dailyVal">–</span></div>
-        <div class="bar"><i id="dailyBar"></i></div>
-        <span class="sub" id="dailySub">–</span>
-      </div>
-      <div class="meter">
-        <div class="top"><span class="lbl">Ruimte tot max drawdown (8%)</span><span class="val" id="maxVal">–</span></div>
-        <div class="bar"><i id="maxBar"></i></div>
-        <span class="sub" id="maxSub">–</span>
-      </div>
-      <div class="meter">
-        <div class="top"><span class="lbl">Winstdoel</span><span class="val" id="tgtVal">–</span></div>
-        <div class="bar"><i id="tgtBar" class="gold"></i></div>
-        <span class="sub" id="tgtSub">–</span>
-      </div>
-    </div>
-  </section>
+<!-- TAB: TRADE -->
+<main id="tab-trade">
+  <div class="news" id="newsBanner"><span class="dot"></span><span id="newsTxt">Nieuwskalender laden…</span></div>
 
-  <!-- TRADE TICKET -->
-  <section aria-labelledby="hTrade">
-    <h2 id="hTrade">Trade</h2>
-    <div class="seg gold" role="group" aria-label="Instrument">
+  <div id="lockBox" class="lock" hidden>
+    <h3>Klaar voor vandaag</h3>
+    <p id="lockWhy">–</p>
+    <p class="hint" id="lockUntil">–</p>
+    <button class="btn danger hold" id="unlockBtn" type="button"><i id="unlockFill"></i><span style="position:relative">Houd 3 sec vast om te ontgrendelen</span></button>
+  </div>
+
+  <div id="tradeBox" style="display:flex;flex-direction:column;gap:12px">
+    <div class="seg sym" role="group" aria-label="Instrument">
       <button type="button" id="symXAU" aria-pressed="true">XAUUSD</button>
       <button type="button" id="symEUR" aria-pressed="false">EURUSD</button>
     </div>
-    <div class="field">
-      <span class="lbl">Risico per trade</span>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div class="presets" role="group" aria-label="Risico presets">
-          <button type="button" data-r="0.25">0,25%</button>
-          <button type="button" data-r="0.5">0,5%</button>
-          <button type="button" data-r="0.75">0,75%</button>
-          <button type="button" data-r="1">1%</button>
-        </div>
-        <div style="flex:1;min-width:110px"><input type="text" id="riskPct" inputmode="decimal" value="0.5" aria-label="Risico in procent"></div>
-      </div>
-      <span class="hint" id="riskHint">–</span>
-    </div>
-    <div class="row">
-      <div class="field"><label for="entry">Entry</label><input type="text" id="entry" inputmode="decimal"></div>
-      <div class="field"><label for="sl" id="slLabel">Stop-loss</label><input type="text" id="sl" inputmode="decimal"></div>
-    </div>
-    <div class="seg" role="group" aria-label="Stop-loss invoer">
-      <button type="button" id="slModePrice" aria-pressed="true">SL als prijs</button>
-      <button type="button" id="slModeDist" aria-pressed="false">SL als afstand</button>
-    </div>
-    <div class="field"><label for="tp">Take-profit (optioneel)</label><input type="text" id="tp" inputmode="decimal"></div>
-  </section>
 
-  <!-- RESULT SLIP -->
-  <div class="slip" aria-live="polite">
-    <div class="hero">
-      <div>
-        <div class="lbl">Lotsize</div>
-        <div class="lots"><span id="lots">–</span><small>lot</small></div>
+    <div class="card">
+      <div class="inline" style="justify-content:space-between">
+        <h2>Risico</h2><span class="hint num" id="riskHint">–</span>
       </div>
-      <span class="dir none" id="dir">–</span>
+      <div class="inline">
+        <div class="pills" role="group" aria-label="Risico presets">
+          <button class="pill" type="button" data-r="0.25">0,25%</button>
+          <button class="pill" type="button" data-r="0.5">0,5%</button>
+          <button class="pill" type="button" data-r="0.75">0,75%</button>
+          <button class="pill" type="button" data-r="1">1%</button>
+        </div>
+        <div style="flex:1;min-width:90px"><input type="text" id="riskPct" inputmode="decimal" aria-label="Risico in procent"></div>
+      </div>
     </div>
+
+    <div class="card">
+      <div class="inline" style="justify-content:space-between">
+        <h2>Order</h2>
+        <div class="seg" role="group" aria-label="Stop-loss invoer" style="flex:0 0 auto">
+          <button type="button" id="slModePrice" aria-pressed="true" style="padding:6px 10px;font-size:.8rem">Prijs</button>
+          <button type="button" id="slModeDist" aria-pressed="false" style="padding:6px 10px;font-size:.8rem">Afstand</button>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="lbl" for="entry">Entry</label><input type="text" id="entry" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sl" id="slLabel">Stop-loss</label><input type="text" id="sl" inputmode="decimal"></div>
+      </div>
+      <div class="pills" id="slQuick" role="group" aria-label="Snelle SL-afstand"></div>
+      <div class="field"><label class="lbl" for="tp">Take-profit (optioneel)</label><input type="text" id="tp" inputmode="decimal"></div>
+    </div>
+
+    <div class="card">
+      <h2>Details</h2>
+      <dl>
+        <dt>Risico in $</dt><dd id="rRisk">–</dd>
+        <dt>SL-afstand</dt><dd id="rDist">–</dd>
+        <dt>Winst bij TP · R:R</dt><dd id="rTp">–</dd>
+        <dt>Benodigde margin</dt><dd id="rMargin">–</dd>
+        <dt>Dagruimte als SL raakt</dt><dd id="rAfter">–</dd>
+      </dl>
+      <div class="alerts" id="alerts"></div>
+    </div>
+
+    <details class="card" id="partialBox">
+      <summary>Gedeeltelijk sluiten &amp; breakeven</summary>
+      <div class="body">
+        <div class="grid2">
+          <div class="field"><label class="lbl" for="tp1">TP1 (prijs)</label><input type="text" id="tp1" inputmode="decimal"></div>
+          <div class="field"><span class="lbl">Sluiten bij TP1</span>
+            <div class="pills" role="group" aria-label="Percentage sluiten">
+              <button class="pill" type="button" data-p="25">25%</button>
+              <button class="pill" type="button" data-p="50">50%</button>
+              <button class="pill" type="button" data-p="75">75%</button>
+            </div>
+          </div>
+        </div>
+        <dl>
+          <dt>Sluiten bij TP1</dt><dd id="pClose">–</dd>
+          <dt>Winst vast bij TP1</dt><dd id="pLocked">–</dd>
+          <dt>Blijft open</dt><dd id="pRem">–</dd>
+          <dt>SL naar entry</dt><dd id="pBE">–</dd>
+          <dt>Risicovrij SL-niveau</dt><dd id="pFree">–</dd>
+        </dl>
+        <p class="hint" style="margin:0">Risicovrij SL-niveau: raakt de rest daar zijn stop, dan heft het verlies precies de winst van TP1 op.</p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<!-- TAB: NIEUWS -->
+<main id="tab-news" hidden>
+  <div class="card">
+    <div class="inline" style="justify-content:space-between">
+      <h2>High-impact nieuws</h2>
+      <div class="seg" role="group" aria-label="Filter" style="flex:0 0 auto">
+        <button type="button" id="nfSym" aria-pressed="true" style="padding:6px 10px;font-size:.8rem">Mijn paren</button>
+        <button type="button" id="nfAll" aria-pressed="false" style="padding:6px 10px;font-size:.8rem">Alles</button>
+      </div>
+    </div>
+    <p class="hint" style="margin:0">Tijden in Nederlandse tijd. Jouw vermijdvenster: 15 min vóór tot 30 min na een event.</p>
+    <div id="newsList"></div>
+  </div>
+  <p class="hint" style="text-align:center" id="newsSrc">Bron: Forex Factory, via de kalender in je GitHub-repository.</p>
+</main>
+
+<!-- TAB: ACCOUNT -->
+<main id="tab-acct" hidden>
+  <div class="card">
+    <h2>Account vandaag</h2>
+    <div class="grid3">
+      <div class="field"><label class="lbl" for="bal">Balance</label><input type="text" id="bal" inputmode="decimal"></div>
+      <div class="field"><label class="lbl" for="dayStart">Dagstart</label><input type="text" id="dayStart" inputmode="decimal"></div>
+      <div class="field"><label class="lbl" for="openPL">Open P/L</label><input type="text" id="openPL" inputmode="decimal"></div>
+    </div>
+    <p class="hint" style="margin:0">Dagstart wordt bij elke dagreset automatisch je balance. Gelogde trades passen je balance zelf aan.</p>
     <dl>
-      <dt>Risico in $</dt><dd id="rRisk">–</dd>
-      <dt>SL-afstand</dt><dd id="rDist">–</dd>
-      <dt>Waarde per lot</dt><dd id="rPer">–</dd>
-      <dt>Winst bij TP · R:R</dt><dd id="rTp">–</dd>
-      <dt>Benodigde margin</dt><dd id="rMargin">–</dd>
-      <dt>Dagruimte als SL raakt</dt><dd id="rAfter">–</dd>
+      <dt>Equity</dt><dd id="aEq">–</dd>
+      <dt>Ondergrens vandaag (4%)</dt><dd id="aDayFloor">–</dd>
+      <dt>Ondergrens max DD (8%)</dt><dd id="aMaxFloor">–</dd>
+      <dt>Winstdoel</dt><dd id="aTgt">–</dd>
+      <dt>Handelsdagen deze fase</dt><dd id="aDays">–</dd>
     </dl>
-    <div class="alerts" id="alerts"></div>
   </div>
 
-  <!-- SETTINGS -->
-  <details id="settings">
-    <summary>Instellingen en regels</summary>
-    <div class="inner">
-      <div class="row">
-        <div class="field"><label for="initBal">Startkapitaal</label><input type="text" id="initBal" inputmode="decimal" value="10000"></div>
-        <div class="field"><label for="comm">Commissie per lot (round turn, $)</label><input type="text" id="comm" inputmode="decimal" value="0"></div>
+  <div class="card">
+    <div class="inline" style="justify-content:space-between"><h2>Trades vandaag</h2><span class="num hint" id="logSum">–</span></div>
+    <div class="log" id="logList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Persoonlijke dagstop</h2>
+    <div class="grid2">
+      <div class="field"><label class="lbl" for="stopPct">Max verlies per dag (%)</label><input type="text" id="stopPct" inputmode="decimal"></div>
+      <div class="field"><label class="lbl" for="stopLoss">Max verliestrades per dag</label><input type="text" id="stopLoss" inputmode="numeric"></div>
+    </div>
+    <p class="hint" style="margin:0">Bereik je een van deze grenzen, dan blokkeert het tradescherm tot de volgende dagreset. Strenger dan Alpha (4%), zodat je nooit in de buurt komt.</p>
+  </div>
+
+  <div class="card">
+    <h2>Instellingen</h2>
+    <div class="grid2">
+      <div class="field"><label class="lbl" for="initBal">Startkapitaal</label><input type="text" id="initBal" inputmode="decimal"></div>
+      <div class="field"><label class="lbl" for="comm">Commissie / lot (round turn $)</label><input type="text" id="comm" inputmode="decimal"></div>
+    </div>
+    <div class="field"><span class="lbl">Fase</span>
+      <div class="seg" role="group" aria-label="Fase">
+        <button type="button" id="ph1" aria-pressed="true">Fase 1 · 8%</button>
+        <button type="button" id="ph2" aria-pressed="false">Fase 2 · 5%</button>
       </div>
-      <div class="field">
-        <span class="lbl">Fase</span>
-        <div class="seg" role="group" aria-label="Fase">
-          <button type="button" id="ph1" aria-pressed="true">Fase 1 · doel 8%</button>
-          <button type="button" id="ph2" aria-pressed="false">Fase 2 · doel 5%</button>
-        </div>
+    </div>
+    <div class="field"><span class="lbl">Weergave</span>
+      <div class="seg" role="group" aria-label="Thema">
+        <button type="button" data-th="dark">Donker</button>
+        <button type="button" data-th="light">Licht</button>
+        <button type="button" data-th="auto">Automatisch</button>
       </div>
+    </div>
+  </div>
+
+  <details class="card">
+    <summary>Regels Alpha Pro 8%</summary>
+    <div class="body">
       <ul class="rules">
-        <li>Dagelijkse limiet 4%, balance-based. Open posities tellen mee. De tool rekent met de strengste variant: 4% van het laagste van startkapitaal en dagstart-balance.</li>
-        <li>Max drawdown 8% statisch: equity mag nooit onder <span id="ruleFloor">$9.200</span>.</li>
+        <li>Dagelijkse limiet 4%, balance-based, open posities tellen mee. De app rekent met de strengste variant.</li>
+        <li>Max drawdown 8% statisch: equity nooit onder <span id="ruleFloor">$9.200</span>.</li>
         <li>Dagreset 00:00 GMT+3 (<span id="ruleReset">–</span> Nederlandse tijd).</li>
-        <li>Minimaal 3 handelsdagen per fase. Max 5 lots open bij $10K.</li>
-        <li>Minstens 50% van je winst moet uit trades komen die langer dan 2 minuten openstaan.</li>
-        <li>Hefboom: forex 1:100, metalen 1:30. XAUUSD 1 lot = 100 oz, EURUSD 1 lot = 100.000.</li>
-        <li>Evaluatie: nieuws is toegestaan. Na kwalificatie: niet openen of sluiten binnen 5 minuten rond high-impact nieuws (voor goud een brede lijst).</li>
+        <li>Minimaal 3 handelsdagen per fase. Max 5 lots bij $10K.</li>
+        <li>Minstens 50% van je winst uit trades die langer dan 2 minuten openstaan.</li>
+        <li>Hefboom forex 1:100, metalen 1:30. XAUUSD 1 lot = 100 oz, EURUSD 1 lot = 100.000.</li>
+        <li>Evaluatie: nieuws toegestaan. Na kwalificatie: niet openen of sluiten binnen 5 minuten rond high-impact nieuws.</li>
       </ul>
     </div>
   </details>
 
-  <p class="foot">Hulpmiddel, geen financieel advies. Controleer de regels in je Alpha-dashboard. Je invoer wordt op dit apparaat bewaard.</p>
+  <div class="card">
+    <h2>Gegevens</h2>
+    <button class="btn danger" type="button" id="wipeBtn">Alle gegevens wissen</button>
+    <div class="inline" id="wipeConfirm" hidden>
+      <span class="hint" style="flex:1">Zeker weten? Alles wordt gewist.</span>
+      <button class="btn" type="button" id="wipeNo">Annuleren</button>
+      <button class="btn danger" type="button" id="wipeYes">Wissen</button>
+    </div>
+  </div>
+  <p class="hint" style="text-align:center">Hulpmiddel, geen financieel advies. Je gegevens blijven op dit apparaat.</p>
+</main>
+
+<!-- RESULT DOCK -->
+<div class="dock" id="dock">
+  <div class="dock-in" id="dockIn">
+    <button class="lots" type="button" id="copyLots" aria-label="Lotsize kopiëren">
+      <span class="k">Lotsize · tik om te kopiëren</span>
+      <span class="v"><span id="lots">–</span><small>lot</small></span>
+    </button>
+    <div class="dock-mid">
+      <span class="dir none" id="dir">–</span>
+      <span>Risico <span class="num" id="dRisk">–</span></span>
+    </div>
+    <button class="btn acc" type="button" id="logBtn">Loggen</button>
+  </div>
 </div>
+
+<nav class="tabs" aria-label="Navigatie">
+  <div class="in" role="tablist">
+    <button type="button" role="tab" data-tab="trade" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>Trade</button>
+    <button type="button" role="tab" data-tab="news" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Nieuws<span class="badge" id="newsBadge" hidden></span></button>
+    <button type="button" role="tab" data-tab="acct" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Account</button>
+  </div>
+</nav>
+
+<!-- LOG SHEET -->
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-labelledby="sheetT">
+  <h3 id="sheetT">Trade loggen</h3>
+  <span class="hint" id="sheetInfo">–</span>
+  <div class="res3" role="group" aria-label="Resultaat">
+    <button type="button" class="w" data-res="win">Win</button>
+    <button type="button" class="l" data-res="loss">Loss</button>
+    <button type="button" class="b" data-res="be">Breakeven</button>
+  </div>
+  <div class="field"><label class="lbl" for="plIn">Resultaat in $ (pas aan naar je echte resultaat)</label><input type="text" id="plIn" inputmode="decimal"></div>
+  <div class="grid2">
+    <button class="btn" type="button" id="sheetCancel">Annuleren</button>
+    <button class="btn acc" type="button" id="sheetSave">Opslaan</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
 (function(){
+  'use strict';
   const $ = id => document.getElementById(id);
-  const num = v => { const n = parseFloat(String(v).replace(/\s/g,'').replace(',', '.')); return isFinite(n) ? n : NaN; };
-  const usd = (n, d=2) => isFinite(n) ? (n<0?'−':'') + '$' + Math.abs(n).toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d}) : '–';
-  const fmt = (n, d=2) => isFinite(n) ? n.toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d}) : '–';
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/\s/g,'').replace(',', '.')); return isFinite(n) ? n : NaN; };
+  const nf = (n,d=2) => n.toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const usd = (n,d=2) => isFinite(n) ? (n<0?'−':'') + '$' + nf(Math.abs(n),d) : '–';
+  const fmt = (n,d=2) => isFinite(n) ? nf(n,d) : '–';
+  const TZ = 'Europe/Amsterdam';
+  const hm = d => d.toLocaleTimeString('nl-NL',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
 
   const SYM = {
-    XAU:{name:'XAUUSD', contract:100, lev:30, pip:0.1, pipName:'pips (0,10)', distUnit:'$', ex:{entry:'4000.00', sl:'3994.00', tp:'4012.00'}, dec:2},
-    EUR:{name:'EURUSD', contract:100000, lev:100, pip:0.0001, pipName:'pips', distUnit:'pips', ex:{entry:'1.1700', sl:'1.1680', tp:'1.1740'}, dec:5}
+    XAU:{contract:100, lev:30, pip:0.1, dec:2, ex:{entry:'4000.00',sl:'3994.00',tp:'4012.00'}, quick:[3,5,8,10], quickUnit:'$'},
+    EUR:{contract:100000, lev:100, pip:0.0001, dec:5, ex:{entry:'1.17000',sl:'1.16800',tp:'1.17400'}, quick:[10,15,20,30], quickUnit:'pips'}
   };
-  const MAX_LOTS_PER_10K = 5, DAILY_PCT = 0.04, MAX_PCT = 0.08;
+  const MAX_LOTS_PER_10K = 5, DAILY_PCT = .04, MAX_PCT = .08;
+  const CAL_URLS = ['https://raw.githubusercontent.com/BenjaminMaltha/Lotzize-callculator-10k-prop/main/calendar.json','calendar.json'];
 
-  let st = { sym:'XAU', slMode:'price', phase:1, riskPct:'0.5', fields:{} };
-  const KEY = 'alphaRiskDesk.v1';
-  try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) st = Object.assign(st, s); } catch(e){}
-  const save = () => {
-    st.updatedAt = Date.now();
-    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){}
-  };
+  // ---------- state ----------
+  const KEY = 'alphaRiskDesk.v2';
+  const def = () => ({ v:2, sym:'XAU', slMode:'price', riskPct:'0.5', phase:1, theme:'dark', newsFilter:'sym',
+    acct:{init:'10000', bal:'10000', dayStart:'10000', openPL:'0', comm:'0'}, dayKey:null,
+    trade:{}, partial:{tp1:'', pct:50}, stop:{pct:'2', losses:'2', unlockedKey:null}, log:[] });
+  let st = def();
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s) st = Object.assign(def(), s, {acct:Object.assign(def().acct, s.acct||{}), stop:Object.assign(def().stop, s.stop||{}), partial:Object.assign(def().partial, s.partial||{})});
+    else { // migrate v1
+      const o = JSON.parse(localStorage.getItem('alphaRiskDesk.v1') || 'null');
+      if (o) { const f = o.fields||{}; st.sym=o.sym||'XAU'; st.slMode=o.slMode||'price'; st.phase=o.phase||1; st.riskPct=o.riskPct||'0.5'; st.trade=o.trade||{};
+        ['bal','dayStart','openPL','comm'].forEach(k=>{ if (f[k]!=null) st.acct[k]=f[k]; }); if (f.initBal!=null) st.acct.init=f.initBal; }
+    }
+  } catch(e){}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} };
 
-  const acctIds = ['bal','dayStart','openPL','initBal','comm'];
-  const tradeIds = ['entry','sl','tp'];
-  // restore
-  function restoreAcct(){
-    acctIds.forEach(id => { if (st.fields[id] != null && document.activeElement !== $(id)) $(id).value = st.fields[id]; });
-    if (st.fields.bal != null) $('exampleNote').hidden = true;
+  // ---------- day handling (reset 00:00 GMT+3 = 21:00 UTC) ----------
+  const dayKey = (d=new Date()) => new Date(d.getTime() + 3*3600e3).toISOString().slice(0,10);
+  function nextReset(){ const n=new Date(); const r=new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),21)); if (r<=n) r.setUTCDate(r.getUTCDate()+1); return r; }
+  function rollDay(){
+    const k = dayKey();
+    if (st.dayKey !== k) {
+      if (st.dayKey) { st.acct.dayStart = st.acct.bal; st.acct.openPL = '0'; }
+      st.dayKey = k; save(); fillAcct();
+    }
   }
-  restoreAcct();
+
+  // ---------- DOM helpers ----------
+  const setPressed = (sel, pred) => document.querySelectorAll(sel).forEach(b => b.setAttribute('aria-pressed', !!pred(b)));
+  let toastT;
+  function toast(t){ const el=$('toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1600); }
+
+  function fillAcct(){
+    const a = st.acct, f = document.activeElement;
+    [['bal',a.bal],['dayStart',a.dayStart],['openPL',a.openPL],['initBal',a.init],['comm',a.comm],['stopPct',st.stop.pct],['stopLoss',st.stop.losses]]
+      .forEach(([id,v]) => { if (f !== $(id)) $(id).value = v; });
+  }
   function loadTrade(){
-    const t = (st.trade && st.trade[st.sym]) || null;
-    const ex = SYM[st.sym].ex;
+    const t = st.trade[st.sym], ex = SYM[st.sym].ex;
     $('entry').value = t ? t.entry : ex.entry;
-    $('sl').value = t ? t.sl : (st.slMode==='price' ? ex.sl : (st.sym==='XAU' ? '6' : '20'));
+    $('sl').value = t ? t.sl : (st.slMode==='price' ? ex.sl : String(SYM[st.sym].quick[1]));
     $('tp').value = t ? t.tp : ex.tp;
   }
-  $('riskPct').value = st.riskPct;
+  function applyUI(){
+    document.documentElement.dataset.sym = st.sym;
+    document.documentElement.dataset.theme = st.theme;
+    $('symXAU').setAttribute('aria-pressed', st.sym==='XAU'); $('symEUR').setAttribute('aria-pressed', st.sym==='EUR');
+    $('slModePrice').setAttribute('aria-pressed', st.slMode==='price'); $('slModeDist').setAttribute('aria-pressed', st.slMode==='dist');
+    $('ph1').setAttribute('aria-pressed', st.phase===1); $('ph2').setAttribute('aria-pressed', st.phase===2);
+    setPressed('[data-th]', b => b.dataset.th === st.theme);
+    $('nfSym').setAttribute('aria-pressed', st.newsFilter==='sym'); $('nfAll').setAttribute('aria-pressed', st.newsFilter==='all');
+    const S = SYM[st.sym];
+    $('slLabel').textContent = st.slMode==='price' ? 'Stop-loss (prijs)' : (st.sym==='XAU' ? 'SL-afstand ($)' : 'SL-afstand (pips)');
+    $('slQuick').innerHTML = '';
+    S.quick.forEach(q => { const b=document.createElement('button'); b.type='button'; b.className='pill'; b.textContent = st.sym==='XAU' ? `$${q}` : `${q} pips`;
+      b.onclick = () => { const e=num($('entry').value); const d = st.sym==='XAU'? q : q*S.pip;
+        if (st.slMode==='dist') $('sl').value = String(q);
+        else if (isFinite(e)) { const tp=num($('tp').value); const long = !(isFinite(tp) && tp<e); $('sl').value = (long? e-d : e+d).toFixed(S.dec); }
+        persist(); calc(); };
+      $('slQuick').appendChild(b); });
+    const tm = document.querySelector('meta[name=theme-color]');
+    tm.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0e1116');
+  }
 
-  function setPressed(a, b, on){ $(a).setAttribute('aria-pressed', on); $(b).setAttribute('aria-pressed', !on); }
+  // ---------- core calc ----------
+  let last = {};
+  function acctNums(){
+    const a = st.acct;
+    const init = num(a.init) || 10000, bal = num(a.bal), ds = num(a.dayStart);
+    const opl = isFinite(num(a.openPL)) ? num(a.openPL) : 0, comm = isFinite(num(a.comm)) ? num(a.comm) : 0;
+    const equity = bal + opl;
+    const dailyAllow = Math.min(init, ds) * DAILY_PCT, dailyFloor = ds - dailyAllow, dailyLeft = equity - dailyFloor;
+    const maxFloor = init*(1-MAX_PCT), maxLeft = equity - maxFloor;
+    const tgtPct = st.phase===1 ? .08 : .05, tgt = init*(1+tgtPct), prog = (bal-init)/(tgt-init);
+    return {init,bal,ds,opl,comm,equity,dailyAllow,dailyFloor,dailyLeft,maxFloor,maxLeft,tgtPct,tgt,prog};
+  }
+  const paint = (el, f) => { f=Math.max(0,Math.min(1,f)); el.style.width=(f*100)+'%'; el.className = f<.25?'bad':f<.5?'warn':''; };
 
-  function resetInfo(){
-    // Reset at 00:00 GMT+3 = 21:00 UTC
-    const now = new Date();
-    const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 21, 0, 0));
-    if (next <= now) next.setUTCDate(next.getUTCDate()+1);
-    const nl = next.toLocaleTimeString('nl-NL',{timeZone:'Europe/Amsterdam',hour:'2-digit',minute:'2-digit'});
-    const mins = Math.round((next-now)/60000), h = Math.floor(mins/60), m = mins%60;
-    $('chipReset').textContent = `Dagreset ${nl} · over ${h}u ${String(m).padStart(2,'0')}m`;
-    $('ruleReset').textContent = nl;
-    return nl;
+  function lockState(A){
+    const today = dayKey();
+    const todays = st.log.filter(t => t.dayKey===today);
+    const losses = todays.filter(t => t.pl < 0).length;
+    const lossAmt = Math.max(0, A.ds - A.equity);
+    const pct = num(st.stop.pct), maxL = parseInt(st.stop.losses,10);
+    let why = null;
+    if (A.dailyLeft <= 0) why = 'Je hebt de dagelijkse limiet van Alpha bereikt.';
+    else if (isFinite(pct) && pct>0 && lossAmt >= A.init*pct/100) why = `Je zit vandaag op ${usd(-lossAmt)} verlies. Je eigen grens is ${fmt(pct,1)}% (${usd(A.init*pct/100)}).`;
+    else if (isFinite(maxL) && maxL>0 && losses >= maxL) why = `${losses} verliestrades vandaag. Je eigen grens is ${maxL}.`;
+    return { locked: !!why && st.stop.unlockedKey !== today, why, todays, losses };
   }
 
   function calc(){
-    const S = SYM[st.sym];
-    const init = num($('initBal').value), bal = num($('bal').value), ds = num($('dayStart').value);
-    const opl = isFinite(num($('openPL').value)) ? num($('openPL').value) : 0;
-    const comm = isFinite(num($('comm').value)) ? num($('comm').value) : 0;
-    const equity = bal + opl;
+    const S = SYM[st.sym], A = acctNums();
+    // header gauges
+    $('gDay').textContent = usd(A.dailyLeft,0); paint($('gDayBar'), A.dailyLeft/A.dailyAllow);
+    $('gMax').textContent = usd(A.maxLeft,0); paint($('gMaxBar'), A.maxLeft/(A.init*MAX_PCT));
+    $('gTgtK').textContent = `Doel F${st.phase}`;
+    $('gTgt').textContent = A.bal >= A.tgt ? 'Behaald' : usd(A.tgt-A.bal,0);
+    $('gTgtBar').style.width = (Math.max(0,Math.min(1,A.prog))*100)+'%';
 
-    // Status
-    const dailyAllow = Math.min(init, ds) * DAILY_PCT;
-    const dailyFloor = ds - dailyAllow;
-    const dailyLeft = equity - dailyFloor;
-    const maxFloor = init * (1 - MAX_PCT);
-    const maxLeft = equity - maxFloor;
-    const tgtPct = st.phase === 1 ? 0.08 : 0.05;
-    const tgt = init * (1 + tgtPct);
-    const prog = (bal - init) / (tgt - init);
+    // account tab
+    $('aEq').textContent = usd(A.equity); $('aDayFloor').textContent = usd(A.dailyFloor); $('aMaxFloor').textContent = usd(A.maxFloor);
+    $('aTgt').textContent = `${usd(A.tgt)} · ${fmt(Math.max(0,A.prog)*100,0)}%`; $('ruleFloor').textContent = usd(A.maxFloor,0);
+    const days = new Set(st.log.filter(t=>t.phase===st.phase).map(t=>t.dayKey)).size;
+    $('aDays').textContent = `${days} / 3${days>=3?' ✓':''}`;
 
-    const paint = (bar, frac) => { const f = Math.max(0, Math.min(1, frac)); bar.style.width = (f*100)+'%'; bar.className = f < .25 ? 'bad' : f < .5 ? 'warn' : ''; };
-    $('dailyVal').textContent = usd(dailyLeft);
-    paint($('dailyBar'), dailyLeft / dailyAllow);
-    $('dailySub').textContent = `Equity ${usd(equity)} · ondergrens vandaag ${usd(dailyFloor)}`;
-    $('maxVal').textContent = usd(maxLeft);
-    paint($('maxBar'), maxLeft / (init*MAX_PCT));
-    $('maxSub').textContent = `Equity mag niet onder ${usd(maxFloor)}`;
-    $('ruleFloor').textContent = usd(maxFloor,0);
-    $('tgtVal').textContent = bal >= tgt ? 'Behaald' : `nog ${usd(tgt - bal)}`;
-    $('tgtBar').style.width = (Math.max(0, Math.min(1, prog))*100)+'%';
-    $('tgtSub').textContent = `Doel fase ${st.phase}: ${usd(tgt)} (+${fmt(tgtPct*100,0)}%) · ${fmt(Math.max(0,prog)*100,0)}% van de weg`;
-    $('chipPhase').textContent = `Fase ${st.phase} · evaluatie`;
-    $('chipPlan').textContent = `Alpha Pro 8% · $${fmt(init/1000,0)}K`;
+    // lock
+    const L = lockState(A);
+    $('lockBox').hidden = !L.locked; $('tradeBox').hidden = L.locked;
+    $('dock').hidden = L.locked || $('tab-trade').hidden;
+    if (L.locked) { $('lockWhy').textContent = L.why; $('lockUntil').textContent = `Weer open na de dagreset om ${hm(nextReset())}.`; }
 
-    // Trade
-    const rp = num($('riskPct').value);
-    const riskUsd = init * rp / 100;
-    $('riskHint').textContent = isFinite(riskUsd) ? `${fmt(rp,2)}% van ${usd(init,0)} = ${usd(riskUsd)}` : 'Vul een risicopercentage in';
-    document.querySelectorAll('.presets button').forEach(b => b.setAttribute('aria-pressed', num(b.dataset.r) === rp));
-
+    // trade
+    const rp = num($('riskPct').value), riskUsd = A.init*rp/100;
+    $('riskHint').textContent = isFinite(riskUsd) ? `${usd(riskUsd)}` : '–';
+    setPressed('.pill[data-r]', b => num(b.dataset.r) === rp);
     const entry = num($('entry').value), slIn = num($('sl').value), tp = num($('tp').value);
     let dist = NaN, dir = null;
-    if (st.slMode === 'price') {
-      if (isFinite(entry) && isFinite(slIn) && entry !== slIn) { dist = Math.abs(entry - slIn); dir = slIn < entry ? 'long' : 'short'; }
-    } else if (isFinite(slIn) && slIn > 0) {
-      dist = st.sym === 'XAU' ? slIn : slIn * S.pip;
-      if (isFinite(entry) && isFinite(tp) && tp !== entry) dir = tp > entry ? 'long' : 'short';
+    if (st.slMode==='price') { if (isFinite(entry)&&isFinite(slIn)&&entry!==slIn){ dist=Math.abs(entry-slIn); dir = slIn<entry?'long':'short'; } }
+    else if (isFinite(slIn)&&slIn>0) { dist = st.sym==='XAU' ? slIn : slIn*S.pip; if (isFinite(entry)&&isFinite(tp)&&tp!==entry) dir = tp>entry?'long':'short'; }
+    setPressed('#slQuick .pill', b => { const q=num(b.textContent.replace('$','')); return isFinite(dist) && Math.abs((st.sym==='XAU'?q:q*S.pip)-dist) < S.pip/10; });
+
+    const alerts = []; const lossPerLot = dist*S.contract + A.comm;
+    let lots = NaN, risk = NaN;
+    if (isFinite(dist) && isFinite(riskUsd) && riskUsd>0) {
+      lots = Math.floor(riskUsd/lossPerLot*100 + 1e-9)/100;
+      const maxLots = MAX_LOTS_PER_10K*A.init/10000;
+      if (lots > maxLots) { alerts.push(['bad',`Boven het maximum van ${fmt(maxLots)} lot. Begrensd.`]); lots = Math.floor(maxLots*100)/100; }
+      if (lots < .01) { alerts.push(['bad',`Stop te ruim: 0,01 lot riskeert al ${usd(lossPerLot*.01)}.`]); lots = 0; }
+      risk = lots*lossPerLot;
     }
+    $('lots').textContent = isFinite(lots) ? fmt(lots) : '–';
+    const d = $('dir'); d.className = 'dir ' + (dir||'none'); d.textContent = dir==='long'?'BUY':dir==='short'?'SELL':(st.slMode==='dist'?'Richting via TP':'–');
+    $('dRisk').textContent = isFinite(risk) ? usd(risk) : '–';
+    $('rRisk').textContent = isFinite(risk) ? `${usd(risk)} (${fmt(risk/A.init*100)}%)` : '–';
+    $('rDist').textContent = isFinite(dist) ? (st.sym==='XAU' ? `$${fmt(dist)} · ${fmt(dist/S.pip,0)} pips` : `${fmt(dist/S.pip,1)} pips`) : '–';
 
-    const alerts = [];
-    const lossPerLot = dist * S.contract + comm;
-    let lots = NaN, actualRisk = NaN;
-    if (isFinite(dist) && isFinite(riskUsd) && riskUsd > 0) {
-      lots = Math.floor((riskUsd / lossPerLot) * 100 + 1e-9) / 100;
-      const maxLots = MAX_LOTS_PER_10K * init / 10000;
-      if (lots > maxLots) { alerts.push(['bad', `Boven het maximum van ${fmt(maxLots,2)} lot voor dit account. Lotsize begrensd.`]); lots = Math.floor(maxLots*100)/100; }
-      if (lots < 0.01) { alerts.push(['bad', `Stop te ruim voor dit risico: zelfs 0,01 lot riskeert ${usd(lossPerLot*0.01)}. Verklein de stop of verhoog het risico.`]); lots = 0; }
-      actualRisk = lots * lossPerLot;
-    }
+    let tpProfit = NaN;
+    if (isFinite(tp)&&isFinite(entry)&&lots>0&&isFinite(dist)) {
+      const td = Math.abs(tp-entry), wrong = dir && ((dir==='long'&&tp<=entry)||(dir==='short'&&tp>=entry));
+      if (wrong) { $('rTp').textContent='TP aan verkeerde kant'; alerts.push(['warn','Take-profit ligt aan dezelfde kant als je stop-loss.']); }
+      else { tpProfit = lots*td*S.contract - lots*A.comm; $('rTp').textContent = `${usd(tpProfit)} · 1:${fmt(td/dist)}`; if (td/dist<1) alerts.push(['warn',`R:R onder 1:1 (1:${fmt(td/dist)}).`]); }
+    } else $('rTp').textContent='–';
+    if (lots>0&&isFinite(entry)) { const m = lots*S.contract*entry/S.lev; $('rMargin').textContent = `${usd(m)} (1:${S.lev})`; if (m > A.equity*.9) alerts.push(['bad','Margin bijna gelijk aan je equity.']); } else $('rMargin').textContent='–';
+    if (isFinite(risk)) { const after = A.dailyLeft-risk; $('rAfter').textContent = usd(after);
+      if (risk >= A.dailyLeft) alerts.push(['bad',`SL raakt de dagelijkse limiet. Nog ${usd(A.dailyLeft)} ruimte.`]);
+      else if (after < A.dailyAllow*.25) alerts.push(['warn',`Na verlies nog maar ${usd(after)} dagruimte.`]);
+      if (risk >= A.maxLeft) alerts.push(['bad',`SL raakt de max drawdown (${usd(A.maxFloor)}).`]);
+    } else $('rAfter').textContent='–';
+    if (rp>1) alerts.push(['warn',`${fmt(rp)}% per trade is hoog bij 4% dagelijkse limiet.`]);
+    if (newsNow) alerts.unshift(['bad', newsNow]);
+    if (!alerts.length && lots>0) alerts.push(['ok','Binnen je dag- en drawdownlimieten.']);
+    $('alerts').innerHTML=''; alerts.forEach(([k,t])=>{ const el=document.createElement('div'); el.className='alert '+k; el.textContent=t; $('alerts').appendChild(el); });
+    const worst = alerts.some(a=>a[0]==='bad') ? 'bad' : alerts.some(a=>a[0]==='warn') ? 'warn' : (lots>0?'ok':'');
+    $('dockIn').className = 'dock-in ' + worst;
+    $('logBtn').disabled = !(lots>0);
 
-    $('lots').textContent = isFinite(lots) ? fmt(lots,2) : '–';
-    const d = $('dir');
-    d.className = 'dir ' + (dir || 'none');
-    d.textContent = dir === 'long' ? 'BUY / LONG' : dir === 'short' ? 'SELL / SHORT' : (st.slMode==='dist' ? 'Richting via TP' : '–');
+    // partial
+    const tp1 = num($('tp1').value), pct = st.partial.pct;
+    setPressed('.pill[data-p]', b => num(b.dataset.p)===pct);
+    if (lots>=.02 && isFinite(tp1) && isFinite(entry) && dir) {
+      let close = Math.floor(lots*pct/100*100+1e-9)/100; if (close<.01) close=.01; if (close>=lots) close = Math.round((lots-.01)*100)/100;
+      const rem = Math.round((lots-close)*100)/100;
+      const okSide = (dir==='long'&&tp1>entry)||(dir==='short'&&tp1<entry);
+      if (!okSide) { ['pClose','pLocked','pRem','pBE','pFree'].forEach(i=>$(i).textContent='–'); $('pLocked').textContent='TP1 aan verkeerde kant'; }
+      else {
+        const locked = close*Math.abs(tp1-entry)*S.contract - close*A.comm;
+        const freeD = locked/(rem*S.contract), free = dir==='long' ? entry-freeD : entry+freeD;
+        $('pClose').textContent = `${fmt(close)} lot`; $('pLocked').textContent = usd(locked); $('pRem').textContent = `${fmt(rem)} lot`;
+        $('pBE').textContent = `${fmt(entry,S.dec)} · winst ≥ ${usd(locked)}`; $('pFree').textContent = fmt(free,S.dec);
+      }
+    } else { ['pClose','pLocked','pRem','pBE','pFree'].forEach(i=>$(i).textContent='–'); if (lots>0 && lots<.02) $('pClose').textContent='Min. 0,02 lot nodig'; }
 
-    $('rRisk').textContent = isFinite(actualRisk) ? `${usd(actualRisk)} (${fmt(actualRisk/init*100,2)}%)` : '–';
-    if (isFinite(dist)) {
-      $('rDist').textContent = st.sym === 'XAU' ? `$${fmt(dist,2)} · ${fmt(dist/S.pip,0)} pips` : `${fmt(dist/S.pip,1)} pips`;
-    } else $('rDist').textContent = '–';
-    $('rPer').textContent = st.sym === 'XAU' ? `$100 per $1 beweging` : `$10 per pip`;
-
-    if (isFinite(tp) && isFinite(entry) && isFinite(lots) && lots > 0 && isFinite(dist)) {
-      const tpDist = Math.abs(tp - entry);
-      const wrongSide = dir && ((dir === 'long' && tp <= entry) || (dir === 'short' && tp >= entry));
-      if (wrongSide) { $('rTp').textContent = 'TP aan verkeerde kant'; alerts.push(['warn','Take-profit ligt aan dezelfde kant als je stop-loss.']); }
-      else { const prof = lots * tpDist * S.contract - lots*comm; $('rTp').textContent = `${usd(prof)} · 1:${fmt(tpDist/dist,2)}`; if (tpDist/dist < 1) alerts.push(['warn', `R:R onder 1:1 (1:${fmt(tpDist/dist,2)}).`]); }
-    } else $('rTp').textContent = '–';
-
-    if (isFinite(lots) && lots > 0 && isFinite(entry)) {
-      const margin = lots * S.contract * entry / S.lev;
-      $('rMargin').textContent = `${usd(margin)} (1:${S.lev})`;
-      if (margin > equity * 0.9) alerts.push(['bad', 'Margin bijna gelijk aan je equity. Deze positie past niet.']);
-    } else $('rMargin').textContent = '–';
-
-    if (isFinite(actualRisk)) {
-      const after = dailyLeft - actualRisk;
-      $('rAfter').textContent = usd(after);
-      if (actualRisk >= dailyLeft) alerts.push(['bad', `Stop-loss raakt de dagelijkse limiet. Je hebt vandaag nog ${usd(dailyLeft)} ruimte.`]);
-      else if (after < dailyAllow * 0.25) alerts.push(['warn', `Na een verlies heb je vandaag nog maar ${usd(after)} ruimte.`]);
-      if (actualRisk >= maxLeft) alerts.push(['bad', `Stop-loss raakt de max drawdown van ${usd(maxFloor)}.`]);
-    } else $('rAfter').textContent = '–';
-
-    if (isFinite(rp) && rp > 1) alerts.push(['warn', `${fmt(rp,2)}% per trade is hoog bij een dagelijkse limiet van 4%.`]);
-    if (dailyLeft <= 0) alerts.unshift(['bad', 'Dagelijkse limiet bereikt of overschreden. Niet meer handelen vandaag.']);
-    if (!alerts.length && isFinite(lots) && lots > 0) alerts.push(['ok', 'Binnen je dag- en drawdownlimieten.']);
-
-    $('alerts').innerHTML = '';
-    alerts.forEach(([k, t]) => { const el = document.createElement('div'); el.className = 'alert ' + k; el.textContent = t; $('alerts').appendChild(el); });
-
-    // Labels
-    $('slLabel').textContent = st.slMode === 'price' ? 'Stop-loss (prijs)' : (st.sym === 'XAU' ? 'SL-afstand in $' : 'SL-afstand in pips');
+    last = {lots, risk, tpProfit, dir};
+    // log list
+    renderLog(L.todays);
   }
 
-  function persistFields(){
-    acctIds.forEach(id => st.fields[id] = $(id).value);
-    st.trade = st.trade || {};
+  function renderLog(todays){
+    const box = $('logList'); box.innerHTML = '';
+    if (!todays.length) { box.innerHTML = '<p class="hint" style="margin:0">Nog geen trades vandaag. Log een trade via de knop “Loggen” op het tradescherm.</p>'; $('logSum').textContent=''; return; }
+    let sum = 0;
+    todays.slice().reverse().forEach(t => { sum += t.pl;
+      const r = document.createElement('div'); r.className='lr';
+      r.innerHTML = `<span class="num hint">${hm(new Date(t.t))}</span><span>${t.sym==='XAU'?'XAUUSD':'EURUSD'} <span class="hint">${t.dir==='long'?'buy':t.dir==='short'?'sell':''} ${fmt(t.lots)}</span></span><span class="num pl ${t.pl>0?'pos':t.pl<0?'neg':''}">${usd(t.pl)}</span>`;
+      const x = document.createElement('button'); x.className='x'; x.type='button'; x.setAttribute('aria-label','Trade verwijderen'); x.textContent='✕';
+      x.onclick = () => { st.log = st.log.filter(z=>z.id!==t.id); st.acct.bal = String(Math.round((num(st.acct.bal)-t.pl)*100)/100); save(); fillAcct(); calc(); toast('Trade verwijderd'); };
+      r.appendChild(x); box.appendChild(r); });
+    $('logSum').textContent = usd(sum);
+  }
+
+  // ---------- news ----------
+  let events = [], newsNow = null;
+  const XAU_CUR = ['USD','EUR','GBP','AUD','CAD'];
+  const KEYW = /rate|cpi|inflation|gdp|pce|pmi|employment|payroll|unemployment|jobs/i;
+  const rel = e => ({ XAU: XAU_CUR.includes(e.cur) || KEYW.test(e.title), EUR: e.cur==='USD' || e.cur==='EUR' });
+  async function loadNews(){
+    let data = null;
+    for (const u of CAL_URLS) { try { const r = await fetch(u + '?t=' + Date.now(), {cache:'no-store'}); if (r.ok) { data = await r.json(); break; } } catch(e){} }
+    if (data) { try { localStorage.setItem('alphaRiskDesk.cal', JSON.stringify(data)); } catch(e){} }
+    else { try { data = JSON.parse(localStorage.getItem('alphaRiskDesk.cal')||'null'); } catch(e){} }
+    events = Array.isArray(data) ? data.filter(e => e && e.impact==='High' && e.date).map(e => ({ t:new Date(e.date), cur:e.country, title:e.title, fc:e.forecast, pv:e.previous }))
+      .filter(e => !isNaN(e.t)).sort((a,b)=>a.t-b.t) : [];
+    events.forEach(e => e.rel = rel(e));
+    newsLoaded = data !== null;
+    renderNews();
+  }
+  let newsLoaded = false;
+  function renderNews(){
+    const now = Date.now(), mine = events.filter(e => e.rel[st.sym]);
+    const inWin = mine.find(e => now >= e.t - 15*60e3 && now <= +e.t + 30*60e3);
+    const next = mine.find(e => +e.t > now);
+    const b = $('newsBanner'); let cls = '', txt;
+    if (!newsLoaded) { txt = 'Nieuwskalender nog niet beschikbaar. Draai de workflow in GitHub (zie uitleg).'; }
+    else if (inWin) { cls='bad'; txt = `<b>Niet handelen</b> · ${inWin.cur} ${inWin.title} om ${hm(inWin.t)} (venster tot ${hm(new Date(+inWin.t+30*60e3))})`; }
+    else if (next) { const mins = Math.round((next.t-now)/60e3);
+      const when = mins < 60 ? `over ${mins} min` : mins < 24*60 ? `om ${hm(next.t)}` : next.t.toLocaleDateString('nl-NL',{timeZone:TZ,weekday:'short'}) + ' ' + hm(next.t);
+      cls = mins <= 60 ? 'warn' : 'ok'; txt = `${mins<=60?'<b>Let op</b> · ':'Volgende: '}${next.cur} ${next.title} ${when}`; }
+    else { cls='ok'; txt = 'Geen high-impact nieuws meer deze week voor dit paar.'; }
+    b.className = 'news ' + cls; $('newsTxt').innerHTML = txt;
+    newsNow = inWin ? `Nieuwsvenster actief: ${inWin.cur} ${inWin.title} (${hm(inWin.t)}).` : null;
+    $('newsBadge').hidden = !(inWin || (next && next.t-now <= 60*60e3));
+
+    // list
+    const list = $('newsList'); list.innerHTML = '';
+    const shown = st.newsFilter==='all' ? events : events.filter(e => e.rel.XAU || e.rel.EUR);
+    if (!shown.length) { list.innerHTML = `<p class="hint">${newsLoaded ? 'Geen high-impact events gevonden deze week.' : 'Nog geen kalender geladen.'}</p>`; return; }
+    let curDay = null, box;
+    shown.forEach(e => {
+      const dk = e.t.toLocaleDateString('nl-NL',{timeZone:TZ,weekday:'long',day:'numeric',month:'long'});
+      if (dk !== curDay) { curDay = dk; box = document.createElement('div'); box.className='day'; box.innerHTML = `<h3>${dk}</h3>`; list.appendChild(box); }
+      const past = now > +e.t + 30*60e3, active = now >= e.t-15*60e3 && !past;
+      const row = document.createElement('div'); row.className = 'ev' + (past?' past':'') + (active?' now':'');
+      const tags = (e.rel.XAU?'<span class="tag">XAU</span>':'') + (e.rel.EUR?'<span class="tag">EUR</span>':'');
+      const extra = [e.fc?`verw. ${e.fc}`:'', e.pv?`vorig ${e.pv}`:''].filter(Boolean).join(' · ');
+      row.innerHTML = `<span class="t">${hm(e.t)}</span><span class="cur">${e.cur}</span><span>${escapeHtml(e.title)}${tags}<span class="sub">Niet handelen ${hm(new Date(e.t-15*60e3))}–${hm(new Date(+e.t+30*60e3))}${extra?' · '+escapeHtml(extra):''}</span></span>`;
+      box.appendChild(row);
+    });
+  }
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // ---------- persistence of inputs ----------
+  function persist(){
+    st.acct = { init:$('initBal').value, bal:$('bal').value, dayStart:$('dayStart').value, openPL:$('openPL').value, comm:$('comm').value };
+    st.stop.pct = $('stopPct').value; st.stop.losses = $('stopLoss').value;
     st.trade[st.sym] = { entry:$('entry').value, sl:$('sl').value, tp:$('tp').value };
-    st.riskPct = $('riskPct').value;
+    st.riskPct = $('riskPct').value; st.partial.tp1 = $('tp1').value;
     save();
   }
+  document.querySelectorAll('input[type=text]').forEach(el => el.addEventListener('input', () => { if (el.id==='plIn') return; persist(); calc(); }));
 
-  document.querySelectorAll('input').forEach(el => el.addEventListener('input', () => {
-    if (acctIds.includes(el.id)) $('exampleNote').hidden = true;
-    persistFields(); calc();
-  }));
-  document.querySelectorAll('.presets button').forEach(b => b.addEventListener('click', () => { $('riskPct').value = b.dataset.r; persistFields(); calc(); }));
-
-  function setSym(s){ persistFields(); st.sym = s; setPressed('symXAU','symEUR', s==='XAU'); loadTrade(); save(); calc(); }
-  $('symXAU').onclick = () => setSym('XAU');
-  $('symEUR').onclick = () => setSym('EUR');
-
+  // ---------- events ----------
+  document.querySelectorAll('.pill[data-r]').forEach(b => b.onclick = () => { $('riskPct').value = b.dataset.r; persist(); calc(); });
+  document.querySelectorAll('.pill[data-p]').forEach(b => b.onclick = () => { st.partial.pct = num(b.dataset.p); save(); calc(); });
+  function setSym(s){ persist(); st.sym = s; save(); loadTrade(); applyUI(); renderNews(); calc(); }
+  $('symXAU').onclick = () => setSym('XAU'); $('symEUR').onclick = () => setSym('EUR');
   function setSlMode(m){
-    if (m === st.slMode) return;
-    const S = SYM[st.sym], entry = num($('entry').value), v = num($('sl').value);
-    if (m === 'dist' && isFinite(entry) && isFinite(v)) $('sl').value = st.sym==='XAU' ? Math.abs(entry-v).toFixed(2) : (Math.abs(entry-v)/S.pip).toFixed(1);
-    if (m === 'price' && isFinite(entry) && isFinite(v)) { const tp = num($('tp').value); const long = !(isFinite(tp) && tp < entry); const dd = st.sym==='XAU' ? v : v*S.pip; $('sl').value = (long ? entry-dd : entry+dd).toFixed(st.sym==='XAU'?2:5); }
-    st.slMode = m; setPressed('slModePrice','slModeDist', m==='price'); persistFields(); calc();
+    if (m===st.slMode) return; const S=SYM[st.sym], e=num($('entry').value), v=num($('sl').value);
+    if (m==='dist' && isFinite(e)&&isFinite(v)) $('sl').value = st.sym==='XAU' ? Math.abs(e-v).toFixed(2) : (Math.abs(e-v)/S.pip).toFixed(1);
+    if (m==='price' && isFinite(e)&&isFinite(v)) { const tp=num($('tp').value), long=!(isFinite(tp)&&tp<e), dd = st.sym==='XAU'?v:v*S.pip; $('sl').value = (long?e-dd:e+dd).toFixed(S.dec); }
+    st.slMode = m; applyUI(); persist(); calc();
   }
-  $('slModePrice').onclick = () => setSlMode('price');
-  $('slModeDist').onclick = () => setSlMode('dist');
+  $('slModePrice').onclick = () => setSlMode('price'); $('slModeDist').onclick = () => setSlMode('dist');
+  $('ph1').onclick = () => { st.phase=1; save(); applyUI(); calc(); }; $('ph2').onclick = () => { st.phase=2; save(); applyUI(); calc(); };
+  document.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { st.theme = b.dataset.th; save(); applyUI(); });
+  $('nfSym').onclick = () => { st.newsFilter='sym'; save(); applyUI(); renderNews(); };
+  $('nfAll').onclick = () => { st.newsFilter='all'; save(); applyUI(); renderNews(); };
 
-  function setPhase(p){ st.phase = p; setPressed('ph1','ph2', p===1); save(); calc(); }
-  $('ph1').onclick = () => setPhase(1);
-  $('ph2').onclick = () => setPhase(2);
+  // tabs
+  function setTab(t){
+    ['trade','news','acct'].forEach(k => $('tab-'+k).hidden = k!==t);
+    document.querySelectorAll('nav.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
+    $('dock').hidden = t!=='trade'; document.body.classList.toggle('tab-trade', t==='trade');
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('nav.tabs [data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
-  $('newDay').onclick = () => { const b = num($('bal').value); if (isFinite(b)) { $('dayStart').value = $('bal').value; $('openPL').value = '0'; persistFields(); calc(); } };
+  // copy
+  $('copyLots').onclick = async () => {
+    if (!(last.lots>0)) return; const txt = last.lots.toFixed(2);
+    try { await navigator.clipboard.writeText(txt); toast(`${txt} gekopieerd`); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); toast(`${txt} gekopieerd`);}catch(_){toast(txt);} ta.remove(); }
+  };
 
-  // init
-  setPressed('symXAU','symEUR', st.sym==='XAU');
-  setPressed('slModePrice','slModeDist', st.slMode==='price');
-  setPressed('ph1','ph2', st.phase===1);
-  loadTrade();
-  resetInfo(); setInterval(resetInfo, 30000);
-  calc();
+  // log sheet
+  let sheetRes = null;
+  function openSheet(){
+    if (!(last.lots>0)) return;
+    $('sheetInfo').textContent = `${st.sym==='XAU'?'XAUUSD':'EURUSD'} · ${last.dir==='long'?'buy':last.dir==='short'?'sell':''} ${fmt(last.lots)} lot`;
+    sheetRes = null; setPressed('[data-res]', ()=>false); $('plIn').value = '';
+    $('scrim').hidden = false; $('sheet').hidden = false;
+  }
+  function closeSheet(){ $('scrim').hidden = true; $('sheet').hidden = true; }
+  $('logBtn').onclick = openSheet; $('scrim').onclick = closeSheet; $('sheetCancel').onclick = closeSheet;
+  document.querySelectorAll('[data-res]').forEach(b => b.onclick = () => {
+    sheetRes = b.dataset.res; setPressed('[data-res]', x => x===b);
+    const v = sheetRes==='loss' ? -last.risk : sheetRes==='be' ? 0 : (isFinite(last.tpProfit) ? last.tpProfit : '');
+    $('plIn').value = v==='' ? '' : (Math.round(v*100)/100).toFixed(2);
+    if (v==='') $('plIn').focus();
+  });
+  $('sheetSave').onclick = () => {
+    const pl = num($('plIn').value);
+    if (!isFinite(pl)) { toast('Vul een resultaat in'); return; }
+    st.log.push({ id: Date.now()+''+Math.random().toString(36).slice(2,6), t: Date.now(), dayKey: dayKey(), phase: st.phase, sym: st.sym, dir: last.dir, lots: last.lots, pl });
+    st.acct.bal = String(Math.round((num(st.acct.bal)+pl)*100)/100);
+    if (st.log.length > 500) st.log = st.log.slice(-500);
+    save(); fillAcct(); closeSheet(); calc(); toast(pl>0?'Win gelogd':pl<0?'Loss gelogd':'Breakeven gelogd');
+  };
 
-  function applyRemote(){
-    restoreAcct();
-    const f = document.activeElement;
-    if (!['entry','sl','tp','riskPct'].includes(f && f.id)) { loadTrade(); $('riskPct').value = st.riskPct; }
-    setPressed('symXAU','symEUR', st.sym==='XAU');
-    setPressed('slModePrice','slModeDist', st.slMode==='price');
-    setPressed('ph1','ph2', st.phase===1);
-    calc();
+  // unlock (hold 3s)
+  let holdT, holdStart;
+  const fill = $('unlockFill');
+  function holdStartFn(e){ e.preventDefault(); holdStart = Date.now(); fill.style.transition='width 3s linear'; fill.style.width='100%';
+    holdT = setTimeout(() => { st.stop.unlockedKey = dayKey(); save(); calc(); toast('Ontgrendeld voor vandaag'); holdEnd(); }, 3000); }
+  function holdEnd(){ clearTimeout(holdT); fill.style.transition='none'; fill.style.width='0'; }
+  $('unlockBtn').addEventListener('pointerdown', holdStartFn);
+  ['pointerup','pointerleave','pointercancel'].forEach(ev => $('unlockBtn').addEventListener(ev, holdEnd));
+
+  // wipe
+  $('wipeBtn').onclick = () => { $('wipeConfirm').hidden = false; $('wipeBtn').hidden = true; };
+  $('wipeNo').onclick = () => { $('wipeConfirm').hidden = true; $('wipeBtn').hidden = false; };
+  $('wipeYes').onclick = () => { st = def(); st.dayKey = dayKey(); save(); fillAcct(); loadTrade(); $('riskPct').value = st.riskPct; $('tp1').value=''; applyUI(); calc(); $('wipeNo').onclick(); toast('Gegevens gewist'); };
+
+  // clock
+  function tick(){
+    rollDay();
+    const r = nextReset(), mins = Math.round((r-new Date())/60e3);
+    $('resetTxt').textContent = `Reset ${hm(r)} · ${Math.floor(mins/60)}u${String(mins%60).padStart(2,'0')}`;
+    $('ruleReset').textContent = hm(r);
+    renderNews(); calc();
   }
 
-  if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+  // ---------- init ----------
+  fillAcct(); loadTrade(); $('riskPct').value = st.riskPct; $('tp1').value = st.partial.tp1 || '';
+  if (!st.dayKey) { st.dayKey = dayKey(); save(); }
+  applyUI(); tick(); setInterval(tick, 30000);
+  loadNews(); setInterval(loadNews, 15*60e3);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(); loadNews(); } });
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script>
-
 </body>
 </html>
