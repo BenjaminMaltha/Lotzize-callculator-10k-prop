@@ -28,17 +28,20 @@
   color-scheme:dark;
 }
 :root[data-sym="EUR"]{--acc:#5b9bff; --acc-ink:#04122b; --acc-soft:rgba(91,155,255,.15)}
+:root[data-sym="GBP"]{--acc:#b08cff; --acc-ink:#1a0b33; --acc-soft:rgba(176,140,255,.15)}
 :root[data-theme="light"]{
   --bg:#f3f4f7; --surface:#ffffff; --surface-2:#f0f2f5; --line:#e1e4ea; --fg:#141821; --muted:#5f6878;
   --good:#12935b; --warn:#b86e00; --bad:#d23a2e;
   --good-soft:#e3f5ec; --warn-soft:#fdf0dc; --bad-soft:#fde6e3; color-scheme:light}
 :root[data-theme="light"]{--acc:#b7861a; --acc-ink:#fff; --acc-soft:rgba(183,134,26,.12)}
 :root[data-theme="light"][data-sym="EUR"]{--acc:#2f6fe0; --acc-ink:#fff; --acc-soft:rgba(47,111,224,.12)}
+:root[data-theme="light"][data-sym="GBP"]{--acc:#7348d6; --acc-ink:#fff; --acc-soft:rgba(115,72,214,.12)}
 @media (prefers-color-scheme: light){
   :root[data-theme="auto"]{--bg:#f3f4f7; --surface:#ffffff; --surface-2:#f0f2f5; --line:#e1e4ea; --fg:#141821; --muted:#5f6878;
     --good:#12935b; --warn:#b86e00; --bad:#d23a2e; --good-soft:#e3f5ec; --warn-soft:#fdf0dc; --bad-soft:#fde6e3; color-scheme:light;
     --acc:#b7861a; --acc-ink:#fff; --acc-soft:rgba(183,134,26,.12)}
   :root[data-theme="auto"][data-sym="EUR"]{--acc:#2f6fe0; --acc-soft:rgba(47,111,224,.12)}
+  :root[data-theme="auto"][data-sym="GBP"]{--acc:#7348d6; --acc-soft:rgba(115,72,214,.12)}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--fg)}
@@ -183,18 +186,40 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:50;background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:99px;font-size:.85rem;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 @media (max-width:370px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.lots .v{font-size:1.7rem}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* v3: accounts */
+.acct-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px 6px 10px;font-size:.84rem;font-weight:600;cursor:pointer;max-width:62vw;min-width:0}
+.acct-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acct-btn svg{width:14px;height:14px;flex:none;color:var(--muted)}
+.st-dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--good)}
+.st-dot.warn{background:var(--warn)} .st-dot.bad{background:var(--bad)}
+.acc-list{display:flex;flex-direction:column;gap:8px}
+.acc-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 12px;cursor:pointer}
+.acc-row[aria-current="true"]{border-color:var(--acc);background:var(--acc-soft)}
+.acc-row .nm{font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.acc-row .sub{display:block;font-size:.74rem;color:var(--muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-row .rt{text-align:right;font-family:var(--f-num);font-size:.84rem}
+.acc-row .rt small{display:block;font-size:.72rem;color:var(--muted)}
+select{font-family:var(--f-ui);font-size:1rem;padding:12px;border-radius:10px;border:1px solid transparent;background:var(--surface-2);color:var(--fg);width:100%}
+select:focus{outline:none;border-color:var(--acc)}
+.daygrp{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 2px;display:flex;justify-content:space-between}
+.sheet{max-height:86vh;overflow-y:auto}
+.phases{display:flex;gap:3px}
 </style>
 </head>
 <body class="tab-trade">
 
 <header class="top">
   <div class="top-row">
-    <div class="brand"><i></i>Risk Desk</div>
-    <div class="reset" id="resetTxt">Dagreset –</div>
+    <button class="acct-btn" type="button" id="acctBtn" aria-haspopup="dialog">
+      <i class="st-dot" id="acctDot"></i><span id="acctName">Account</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="reset" id="resetTxt">Reset –</div>
   </div>
   <div class="gauges">
-    <div class="g"><div class="k">Dagruimte</div><div class="v" id="gDay">–</div><div class="track"><b id="gDayBar"></b></div></div>
-    <div class="g"><div class="k">Max DD</div><div class="v" id="gMax">–</div><div class="track"><b id="gMaxBar"></b></div></div>
+    <div class="g"><div class="k" id="gDayK">Dagruimte</div><div class="v" id="gDay">–</div><div class="track"><b id="gDayBar"></b></div></div>
+    <div class="g"><div class="k" id="gMaxK">Max DD</div><div class="v" id="gMax">–</div><div class="track"><b id="gMaxBar"></b></div></div>
     <div class="g"><div class="k" id="gTgtK">Doel F1</div><div class="v" id="gTgt">–</div><div class="track"><b id="gTgtBar" class="acc"></b></div></div>
   </div>
 </header>
@@ -212,8 +237,9 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
 
   <div id="tradeBox" style="display:flex;flex-direction:column;gap:12px">
     <div class="seg sym" role="group" aria-label="Instrument">
-      <button type="button" id="symXAU" aria-pressed="true">XAUUSD</button>
-      <button type="button" id="symEUR" aria-pressed="false">EURUSD</button>
+      <button type="button" data-sym="XAU">XAUUSD</button>
+      <button type="button" data-sym="EUR">EURUSD</button>
+      <button type="button" data-sym="GBP">GBPUSD</button>
     </div>
 
     <div class="card">
@@ -298,32 +324,80 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     <p class="hint" style="margin:0">Tijden in Nederlandse tijd. Jouw vermijdvenster: 15 min vóór tot 30 min na een event.</p>
     <div id="newsList"></div>
   </div>
-  <p class="hint" style="text-align:center" id="newsSrc">Bron: Forex Factory, via de kalender in je GitHub-repository.</p>
+  <p class="hint" style="text-align:center">Bron: Forex Factory, via de kalender in je GitHub-repository.</p>
 </main>
 
-<!-- TAB: ACCOUNT -->
+<!-- TAB: ACCOUNTS -->
 <main id="tab-acct" hidden>
   <div class="card">
-    <h2>Account vandaag</h2>
+    <div class="inline" style="justify-content:space-between"><h2>Mijn accounts</h2><span class="hint num" id="accTotal">–</span></div>
+    <div class="acc-list" id="accList"></div>
+    <button class="btn ghost" type="button" id="addAcc">+ Account toevoegen</button>
+  </div>
+
+  <div class="card">
+    <h2 id="actTitle">Actief account</h2>
     <div class="grid3">
       <div class="field"><label class="lbl" for="bal">Balance</label><input type="text" id="bal" inputmode="decimal"></div>
       <div class="field"><label class="lbl" for="dayStart">Dagstart</label><input type="text" id="dayStart" inputmode="decimal"></div>
       <div class="field"><label class="lbl" for="openPL">Open P/L</label><input type="text" id="openPL" inputmode="decimal"></div>
     </div>
     <p class="hint" style="margin:0">Dagstart wordt bij elke dagreset automatisch je balance. Gelogde trades passen je balance zelf aan.</p>
+    <div class="field"><span class="lbl">Fase</span><div class="seg phases" role="group" aria-label="Fase" id="phaseSeg"></div></div>
     <dl>
       <dt>Equity</dt><dd id="aEq">–</dd>
-      <dt>Ondergrens vandaag (4%)</dt><dd id="aDayFloor">–</dd>
-      <dt>Ondergrens max DD (8%)</dt><dd id="aMaxFloor">–</dd>
+      <dt id="aDayK">Ondergrens vandaag</dt><dd id="aDayFloor">–</dd>
+      <dt id="aMaxK">Ondergrens max DD</dt><dd id="aMaxFloor">–</dd>
       <dt>Winstdoel</dt><dd id="aTgt">–</dd>
       <dt>Handelsdagen deze fase</dt><dd id="aDays">–</dd>
+      <dt>Resultaat sinds start</dt><dd id="aPL">–</dd>
     </dl>
   </div>
 
   <div class="card">
-    <div class="inline" style="justify-content:space-between"><h2>Trades vandaag</h2><span class="num hint" id="logSum">–</span></div>
+    <div class="inline" style="justify-content:space-between">
+      <h2>Tradelog</h2>
+      <div class="seg" role="group" aria-label="Periode" style="flex:0 0 auto">
+        <button type="button" id="lfDay" aria-pressed="true" style="padding:6px 10px;font-size:.8rem">Vandaag</button>
+        <button type="button" id="lfAll" aria-pressed="false" style="padding:6px 10px;font-size:.8rem">Alles</button>
+      </div>
+    </div>
+    <div class="inline hint num" id="logStats" style="gap:14px"></div>
     <div class="log" id="logList"></div>
   </div>
+
+  <details class="card" id="accSettings">
+    <summary>Accountinstellingen</summary>
+    <div class="body">
+      <div class="field"><label class="lbl" for="sName">Naam</label><input type="text" id="sName"></div>
+      <div class="field"><label class="lbl" for="sPreset">Type challenge</label><select id="sPreset"></select></div>
+      <div class="grid2">
+        <div class="field"><label class="lbl" for="sInit">Startkapitaal ($)</label><input type="text" id="sInit" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sComm">Commissie / lot ($)</label><input type="text" id="sComm" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sDaily">Dagelijkse limiet (%)</label><input type="text" id="sDaily" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sMax">Max drawdown (%)</label><input type="text" id="sMax" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sTargets">Winstdoelen per fase (%)</label><input type="text" id="sTargets" inputmode="text" placeholder="8, 5"></div>
+        <div class="field"><label class="lbl" for="sDays">Min. handelsdagen</label><input type="text" id="sDays" inputmode="numeric"></div>
+        <div class="field"><label class="lbl" for="sLots">Max lots per $10K (leeg = geen)</label><input type="text" id="sLots" inputmode="decimal"></div>
+        <div class="field"><label class="lbl" for="sReset">Dagreset</label>
+          <select id="sReset"><option value="gmt3">00:00 GMT+3 (Alpha)</option><option value="nl">00:00 Nederlandse tijd (FTMO)</option></select></div>
+      </div>
+      <div class="field"><span class="lbl">Type drawdown</span>
+        <div class="seg" role="group" aria-label="Drawdown type">
+          <button type="button" data-dd="static">Statisch</button>
+          <button type="button" data-dd="trail">Trailing</button>
+          <button type="button" data-dd="traillock">Trailing, stopt bij start</button>
+        </div>
+      </div>
+      <p class="hint" style="margin:0" id="presetNote">–</p>
+      <button class="btn danger" type="button" id="delAcc">Dit account verwijderen</button>
+      <div class="inline" id="delConfirm" hidden>
+        <span class="hint" style="flex:1">Account en alle trades ervan verwijderen?</span>
+        <button class="btn" type="button" id="delNo">Annuleren</button>
+        <button class="btn danger" type="button" id="delYes">Verwijderen</button>
+      </div>
+    </div>
+  </details>
 
   <div class="card">
     <h2>Persoonlijke dagstop</h2>
@@ -331,21 +405,16 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
       <div class="field"><label class="lbl" for="stopPct">Max verlies per dag (%)</label><input type="text" id="stopPct" inputmode="decimal"></div>
       <div class="field"><label class="lbl" for="stopLoss">Max verliestrades per dag</label><input type="text" id="stopLoss" inputmode="numeric"></div>
     </div>
-    <p class="hint" style="margin:0">Bereik je een van deze grenzen, dan blokkeert het tradescherm tot de volgende dagreset. Strenger dan Alpha (4%), zodat je nooit in de buurt komt.</p>
+    <p class="hint" style="margin:0">Geldt per account. Bereik je een grens, dan blokkeert het tradescherm voor dat account tot de volgende dagreset.</p>
   </div>
 
+  <details class="card">
+    <summary>Regels van dit account</summary>
+    <div class="body"><ul class="rules" id="rulesList"></ul></div>
+  </details>
+
   <div class="card">
-    <h2>Instellingen</h2>
-    <div class="grid2">
-      <div class="field"><label class="lbl" for="initBal">Startkapitaal</label><input type="text" id="initBal" inputmode="decimal"></div>
-      <div class="field"><label class="lbl" for="comm">Commissie / lot (round turn $)</label><input type="text" id="comm" inputmode="decimal"></div>
-    </div>
-    <div class="field"><span class="lbl">Fase</span>
-      <div class="seg" role="group" aria-label="Fase">
-        <button type="button" id="ph1" aria-pressed="true">Fase 1 · 8%</button>
-        <button type="button" id="ph2" aria-pressed="false">Fase 2 · 5%</button>
-      </div>
-    </div>
+    <h2>App</h2>
     <div class="field"><span class="lbl">Weergave</span>
       <div class="seg" role="group" aria-label="Thema">
         <button type="button" data-th="dark">Donker</button>
@@ -353,33 +422,14 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
         <button type="button" data-th="auto">Automatisch</button>
       </div>
     </div>
-  </div>
-
-  <details class="card">
-    <summary>Regels Alpha Pro 8%</summary>
-    <div class="body">
-      <ul class="rules">
-        <li>Dagelijkse limiet 4%, balance-based, open posities tellen mee. De app rekent met de strengste variant.</li>
-        <li>Max drawdown 8% statisch: equity nooit onder <span id="ruleFloor">$9.200</span>.</li>
-        <li>Dagreset 00:00 GMT+3 (<span id="ruleReset">–</span> Nederlandse tijd).</li>
-        <li>Minimaal 3 handelsdagen per fase. Max 5 lots bij $10K.</li>
-        <li>Minstens 50% van je winst uit trades die langer dan 2 minuten openstaan.</li>
-        <li>Hefboom forex 1:100, metalen 1:30. XAUUSD 1 lot = 100 oz, EURUSD 1 lot = 100.000.</li>
-        <li>Evaluatie: nieuws toegestaan. Na kwalificatie: niet openen of sluiten binnen 5 minuten rond high-impact nieuws.</li>
-      </ul>
-    </div>
-  </details>
-
-  <div class="card">
-    <h2>Gegevens</h2>
     <button class="btn danger" type="button" id="wipeBtn">Alle gegevens wissen</button>
     <div class="inline" id="wipeConfirm" hidden>
-      <span class="hint" style="flex:1">Zeker weten? Alles wordt gewist.</span>
+      <span class="hint" style="flex:1">Alle accounts en trades wissen?</span>
       <button class="btn" type="button" id="wipeNo">Annuleren</button>
       <button class="btn danger" type="button" id="wipeYes">Wissen</button>
     </div>
   </div>
-  <p class="hint" style="text-align:center">Hulpmiddel, geen financieel advies. Je gegevens blijven op dit apparaat.</p>
+  <p class="hint" style="text-align:center">Hulpmiddel, geen financieel advies. Controleer de regels in je dashboard. Je gegevens blijven op dit apparaat.</p>
 </main>
 
 <!-- RESULT DOCK -->
@@ -391,7 +441,7 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     </button>
     <div class="dock-mid">
       <span class="dir none" id="dir">–</span>
-      <span>Risico <span class="num" id="dRisk">–</span></span>
+      <span class="num" id="dRisk">–</span>
     </div>
     <button class="btn acc" type="button" id="logBtn">Loggen</button>
   </div>
@@ -404,12 +454,13 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     <button type="button" role="tab" data-tab="news" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Nieuws<span class="badge" id="newsBadge" hidden></span></button>
     <button type="button" role="tab" data-tab="acct" aria-selected="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Account</button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Accounts</button>
   </div>
 </nav>
 
-<!-- LOG SHEET -->
 <div class="scrim" id="scrim" hidden></div>
+
+<!-- LOG SHEET -->
 <div class="sheet" id="sheet" hidden role="dialog" aria-labelledby="sheetT">
   <h3 id="sheetT">Trade loggen</h3>
   <span class="hint" id="sheetInfo">–</span>
@@ -424,8 +475,31 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     <button class="btn acc" type="button" id="sheetSave">Opslaan</button>
   </div>
 </div>
-<div class="toast" id="toast" hidden></div>
 
+<!-- ACCOUNT PICKER SHEET -->
+<div class="sheet" id="pickSheet" hidden role="dialog" aria-labelledby="pickT">
+  <h3 id="pickT">Kies account</h3>
+  <div class="acc-list" id="pickList"></div>
+  <button class="btn ghost" type="button" id="pickAdd">+ Account toevoegen</button>
+</div>
+
+<!-- NEW ACCOUNT SHEET -->
+<div class="sheet" id="newSheet" hidden role="dialog" aria-labelledby="newT">
+  <h3 id="newT">Nieuw account</h3>
+  <div class="field"><label class="lbl" for="nPreset">Type challenge</label><select id="nPreset"></select></div>
+  <div class="grid2">
+    <div class="field"><label class="lbl" for="nSize">Accountgrootte ($)</label><input type="text" id="nSize" inputmode="decimal" value="10000"></div>
+    <div class="field"><label class="lbl" for="nPhase">Huidige fase</label><select id="nPhase"></select></div>
+  </div>
+  <div class="field"><label class="lbl" for="nBal">Huidige balance ($)</label><input type="text" id="nBal" inputmode="decimal" placeholder="Gelijk aan accountgrootte"></div>
+  <div class="field"><label class="lbl" for="nName">Naam (optioneel)</label><input type="text" id="nName" placeholder="bijv. Alpha #2"></div>
+  <p class="hint" style="margin:0" id="nNote">–</p>
+  <div class="grid2">
+    <button class="btn" type="button" id="newCancel">Annuleren</button>
+    <button class="btn acc" type="button" id="newSave">Toevoegen</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
 <script>
 (function(){
   'use strict';
@@ -436,51 +510,141 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
   const fmt = (n,d=2) => isFinite(n) ? nf(n,d) : '–';
   const TZ = 'Europe/Amsterdam';
   const hm = d => d.toLocaleTimeString('nl-NL',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
   const SYM = {
-    XAU:{contract:100, lev:30, pip:0.1, dec:2, ex:{entry:'4000.00',sl:'3994.00',tp:'4012.00'}, quick:[3,5,8,10], quickUnit:'$'},
-    EUR:{contract:100000, lev:100, pip:0.0001, dec:5, ex:{entry:'1.17000',sl:'1.16800',tp:'1.17400'}, quick:[10,15,20,30], quickUnit:'pips'}
+    XAU:{name:'XAUUSD', contract:100, lev:30, pip:0.1, dec:2, ex:{entry:'4000.00',sl:'3994.00',tp:'4012.00'}, quick:[3,5,8,10]},
+    EUR:{name:'EURUSD', contract:100000, lev:100, pip:0.0001, dec:5, ex:{entry:'1.17000',sl:'1.16800',tp:'1.17400'}, quick:[10,15,20,30]},
+    GBP:{name:'GBPUSD', contract:100000, lev:100, pip:0.0001, dec:5, ex:{entry:'1.34000',sl:'1.33800',tp:'1.34400'}, quick:[10,15,20,30]}
   };
-  const MAX_LOTS_PER_10K = 5, DAILY_PCT = .04, MAX_PCT = .08;
-  const CAL_URLS = ['https://raw.githubusercontent.com/BenjaminMaltha/Lotzize-callculator-10k-prop/main/calendar.json','calendar.json'];
+  const SYMS = ['XAU','EUR','GBP'];
+
+  // Challenge-types. Waarden: dag%, max DD%, type DD, doelen per fase, min handelsdagen, max lots per $10K, dagreset.
+  const PRESETS = {
+    'alpha-pro-8':  {label:'Alpha Capital · Pro 8%',  short:'Alpha Pro 8%',  daily:4, max:8,  dd:'static',    targets:[8,5],   days:3, lots:5,  reset:'gmt3', note:'Daglimiet op balance bij de reset. Na kwalificatie: niet handelen ±5 min rond high-impact nieuws, geen weekend holding.'},
+    'alpha-pro-6':  {label:'Alpha Capital · Pro 6%',  short:'Alpha Pro 6%',  daily:3, max:6,  dd:'static',    targets:[6,6],   days:3, lots:5,  reset:'gmt3', note:'Daglimiet op het hoogste van balance en equity bij de reset. Had je open winst bij de reset, zet Dagstart dan op die hogere equity.'},
+    'alpha-pro-10': {label:'Alpha Capital · Pro 10%', short:'Alpha Pro 10%', daily:5, max:10, dd:'static',    targets:[10,5],  days:3, lots:5,  reset:'gmt3', note:'Daglimiet op balance bij de reset. Na kwalificatie: niet handelen ±5 min rond high-impact nieuws.'},
+    'alpha-one':    {label:'Alpha Capital · One',     short:'Alpha One',     daily:4, max:6,  dd:'traillock', targets:[10],    days:1, lots:null, reset:'gmt3', note:'Trailing drawdown van 6% die vaststaat op je startkapitaal zodra je +6% staat. Daglimiet op het hoogste van balance en equity. Controleer het max aantal lots in je dashboard.'},
+    'alpha-swing':  {label:'Alpha Capital · Swing',   short:'Alpha Swing',   daily:5, max:10, dd:'static',    targets:[10,5],  days:3, lots:null, reset:'gmt3', note:'Daglimiet op balance. Weekend holding toegestaan. Controleer het max aantal lots in je dashboard.'},
+    'alpha-three':  {label:'Alpha Capital · Three',   short:'Alpha Three',   daily:4, max:6,  dd:'static',    targets:[8,4,4], days:3, lots:null, reset:'gmt3', note:'Drie fasen. Daglimiet op het hoogste van balance en equity. Controleer het max aantal lots in je dashboard.'},
+    'ftmo-2':       {label:'FTMO · 2-Step',           short:'FTMO 2-Step',   daily:5, max:10, dd:'static',    targets:[10,5],  days:4, lots:null, reset:'nl',   note:'Dagreset om middernacht Nederlandse tijd. Minimaal 4 handelsdagen.'},
+    'ftmo-1':       {label:'FTMO · 1-Step',           short:'FTMO 1-Step',   daily:3, max:10, dd:'trail',     targets:[10],    days:0, lots:null, reset:'nl',   note:'Trailing max loss op basis van je hoogste balance (de app rekent conservatief, ook binnen de dag). Best Day Rule: je beste dag max 50% van je winst.'},
+    'custom':       {label:'Eigen instellingen',      short:'Account',       daily:5, max:10, dd:'static',    targets:[10,5],  days:0, lots:null, reset:'nl',   note:'Vul hieronder de regels van je prop firm in.'}
+  };
+  const DD_LABEL = {static:'statisch', trail:'trailing', traillock:'trailing, stopt bij startkapitaal'};
 
   // ---------- state ----------
-  const KEY = 'alphaRiskDesk.v2';
-  const def = () => ({ v:2, sym:'XAU', slMode:'price', riskPct:'0.5', phase:1, theme:'dark', newsFilter:'sym',
-    acct:{init:'10000', bal:'10000', dayStart:'10000', openPL:'0', comm:'0'}, dayKey:null,
-    trade:{}, partial:{tp1:'', pct:50}, stop:{pct:'2', losses:'2', unlockedKey:null}, log:[] });
+  const KEY = 'alphaRiskDesk.v3';
+  const newAccount = (presetId, size, phase, bal, name) => {
+    const p = PRESETS[presetId] || PRESETS.custom;
+    return { id: uid(), name: name || `${p.short} · ${fmt(size/1000,0)}K`, preset: presetId, init: String(size), comm:'0',
+      daily: p.daily, max: p.max, dd: p.dd, targets: p.targets.slice(), days: p.days, lots: p.lots, reset: p.reset,
+      phase: phase || 1, bal: String(bal ?? size), dayStart: String(bal ?? size), openPL: '0', dayKey: null, peak: Math.max(size, bal ?? size), unlockedKey: null };
+  };
+  const def = () => ({ v:3, accounts:[], active:null, sym:'XAU', slMode:'price', riskPct:'0.5', theme:'dark', newsFilter:'sym', logFilter:'day',
+    trade:{}, partial:{tp1:'', pct:50}, stop:{pct:'2', losses:'2'}, log:[] });
   let st = def();
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (s) st = Object.assign(def(), s, {acct:Object.assign(def().acct, s.acct||{}), stop:Object.assign(def().stop, s.stop||{}), partial:Object.assign(def().partial, s.partial||{})});
-    else { // migrate v1
-      const o = JSON.parse(localStorage.getItem('alphaRiskDesk.v1') || 'null');
-      if (o) { const f = o.fields||{}; st.sym=o.sym||'XAU'; st.slMode=o.slMode||'price'; st.phase=o.phase||1; st.riskPct=o.riskPct||'0.5'; st.trade=o.trade||{};
-        ['bal','dayStart','openPL','comm'].forEach(k=>{ if (f[k]!=null) st.acct[k]=f[k]; }); if (f.initBal!=null) st.acct.init=f.initBal; }
+    if (s && Array.isArray(s.accounts) && s.accounts.length) st = Object.assign(def(), s);
+    else {
+      const o = JSON.parse(localStorage.getItem('alphaRiskDesk.v2') || 'null');
+      if (o) {
+        const a = o.acct || {}, init = num(a.init) || 10000;
+        const acc = newAccount('alpha-pro-8', init, o.phase || 1, num(a.bal) || init, 'Alpha Pro 8% · ' + fmt(init/1000,0) + 'K');
+        acc.dayStart = a.dayStart ?? acc.bal; acc.openPL = a.openPL ?? '0'; acc.comm = a.comm ?? '0'; acc.dayKey = o.dayKey || null;
+        acc.unlockedKey = (o.stop && o.stop.unlockedKey) || null;
+        st.accounts = [acc]; st.active = acc.id;
+        ['sym','slMode','riskPct','theme','newsFilter','trade'].forEach(k => { if (o[k] != null) st[k] = o[k]; });
+        if (o.partial) st.partial = Object.assign(st.partial, o.partial);
+        if (o.stop) st.stop = { pct: o.stop.pct ?? '2', losses: o.stop.losses ?? '2' };
+        st.log = (o.log || []).map(t => Object.assign({}, t, { acc: acc.id }));
+      }
     }
   } catch(e){}
+  if (!st.accounts.length) { const a = newAccount('alpha-pro-8', 10000, 1); st.accounts = [a]; st.active = a.id; }
+  if (!SYMS.includes(st.sym)) st.sym = 'XAU';
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} };
+  const acc = () => st.accounts.find(a => a.id === st.active) || st.accounts[0];
 
-  // ---------- day handling (reset 00:00 GMT+3 = 21:00 UTC) ----------
-  const dayKey = (d=new Date()) => new Date(d.getTime() + 3*3600e3).toISOString().slice(0,10);
-  function nextReset(){ const n=new Date(); const r=new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),21)); if (r<=n) r.setUTCDate(r.getUTCDate()+1); return r; }
-  function rollDay(){
-    const k = dayKey();
-    if (st.dayKey !== k) {
-      if (st.dayKey) { st.acct.dayStart = st.acct.bal; st.acct.openPL = '0'; }
-      st.dayKey = k; save(); fillAcct();
+  // ---------- time / day handling ----------
+  function tzOffsetMin(d){
+    try { const p = new Intl.DateTimeFormat('en-US',{timeZone:TZ,timeZoneName:'shortOffset'}).formatToParts(d).find(x=>x.type==='timeZoneName').value;
+      const m = p.match(/GMT([+-])(\d+)(?::(\d+))?/); return m ? (m[1]==='-'?-1:1)*(parseInt(m[2],10)*60 + parseInt(m[3]||'0',10)) : 60; } catch(e){ return 60; }
+  }
+  const dayKey = (a, d=new Date()) => a.reset === 'nl' ? d.toLocaleDateString('en-CA',{timeZone:TZ}) : new Date(d.getTime() + 3*3600e3).toISOString().slice(0,10);
+  function nextReset(a){
+    const n = new Date();
+    if (a.reset === 'nl') {
+      const [y,m,d] = n.toLocaleDateString('en-CA',{timeZone:TZ}).split('-').map(Number);
+      const guess = new Date(Date.UTC(y, m-1, d+1, 0, 0));
+      return new Date(guess.getTime() - tzOffsetMin(guess)*60e3);
     }
+    const r = new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate(), 21)); if (r <= n) r.setUTCDate(r.getUTCDate()+1); return r;
+  }
+  function rollDays(){
+    let changed = false;
+    st.accounts.forEach(a => { const k = dayKey(a);
+      if (a.dayKey !== k) { if (a.dayKey) { a.dayStart = a.bal; a.openPL = '0'; } a.dayKey = k; changed = true; } });
+    if (changed) { save(); fillAcct(); }
   }
 
-  // ---------- DOM helpers ----------
+  // ---------- account maths ----------
+  function nums(a){
+    const init = num(a.init) || 10000, bal = num(a.bal), ds = num(a.dayStart);
+    const opl = isFinite(num(a.openPL)) ? num(a.openPL) : 0, comm = isFinite(num(a.comm)) ? num(a.comm) : 0;
+    const equity = bal + opl, dPct = (num(a.daily)||0)/100, mPct = (num(a.max)||0)/100;
+    const dailyAllow = Math.min(init, ds) * dPct, dailyFloor = ds - dailyAllow, dailyLeft = equity - dailyFloor;
+    const peak = Math.max(num(a.peak) || init, init);
+    let maxFloor = init*(1-mPct);
+    if (a.dd === 'trail') maxFloor = Math.max(maxFloor, peak - init*mPct);
+    if (a.dd === 'traillock') maxFloor = Math.min(init, Math.max(maxFloor, peak - init*mPct));
+    const maxLeft = equity - maxFloor, maxRoom = equity > maxFloor ? (init*mPct) : 1;
+    const targets = (a.targets && a.targets.length) ? a.targets : [10];
+    const ph = Math.min(a.phase||1, targets.length), tgtPct = (num(targets[ph-1])||0)/100;
+    const tgt = init*(1+tgtPct), prog = tgtPct ? (bal-init)/(tgt-init) : 0;
+    const maxLots = isFinite(num(a.lots)) && num(a.lots) > 0 ? num(a.lots)*init/10000 : Infinity;
+    return {init,bal,ds,opl,comm,equity,dPct,mPct,dailyAllow,dailyFloor,dailyLeft,maxFloor,maxLeft,maxRoom,tgtPct,tgt,prog,ph,targets,maxLots};
+  }
+  const bumpPeak = a => { const b = num(a.bal); if (isFinite(b)) a.peak = Math.max(num(a.peak)||0, b); };
+
+  function lockState(a, A){
+    const today = dayKey(a);
+    const todays = st.log.filter(t => t.acc===a.id && t.dayKey===today);
+    const losses = todays.filter(t => t.pl < 0).length;
+    const lossAmt = Math.max(0, A.ds - A.equity);
+    const pct = num(st.stop.pct), maxL = parseInt(st.stop.losses,10);
+    let why = null;
+    if (A.dailyLeft <= 0) why = 'Je hebt de dagelijkse limiet van dit account bereikt.';
+    else if (A.maxLeft <= 0) why = 'Je zit op of onder de max drawdown van dit account.';
+    else if (isFinite(pct) && pct>0 && lossAmt >= A.init*pct/100) why = `Je zit vandaag op ${usd(-lossAmt)} verlies. Je eigen grens is ${fmt(pct,1)}% (${usd(A.init*pct/100)}).`;
+    else if (isFinite(maxL) && maxL>0 && losses >= maxL) why = `${losses} verliestrades vandaag. Je eigen grens is ${maxL}.`;
+    return { locked: !!why && a.unlockedKey !== today, why, todays };
+  }
+  function statusOf(a){
+    const A = nums(a), L = lockState(a, A), f = A.dailyLeft / (A.dailyAllow || 1), g = A.maxLeft / (A.init*A.mPct || 1);
+    return (L.locked || f < .25 || g < .25) ? 'bad' : (f < .5 || g < .5) ? 'warn' : '';
+  }
+
+  // ---------- UI helpers ----------
   const setPressed = (sel, pred) => document.querySelectorAll(sel).forEach(b => b.setAttribute('aria-pressed', !!pred(b)));
   let toastT;
-  function toast(t){ const el=$('toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1600); }
+  function toast(t){ const el=$('toast'); el.textContent=t; el.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>el.hidden=true,1700); }
 
   function fillAcct(){
-    const a = st.acct, f = document.activeElement;
-    [['bal',a.bal],['dayStart',a.dayStart],['openPL',a.openPL],['initBal',a.init],['comm',a.comm],['stopPct',st.stop.pct],['stopLoss',st.stop.losses]]
-      .forEach(([id,v]) => { if (f !== $(id)) $(id).value = v; });
+    const a = acc(), f = document.activeElement;
+    [['bal',a.bal],['dayStart',a.dayStart],['openPL',a.openPL],['stopPct',st.stop.pct],['stopLoss',st.stop.losses],
+     ['sName',a.name],['sInit',a.init],['sComm',a.comm],['sDaily',a.daily],['sMax',a.max],['sTargets',(a.targets||[]).join(', ')],['sDays',a.days],['sLots',a.lots ?? '']]
+      .forEach(([id,v]) => { if (f !== $(id)) $(id).value = v ?? ''; });
+    $('sPreset').value = a.preset in PRESETS ? a.preset : 'custom';
+    $('sReset').value = a.reset;
+    setPressed('[data-dd]', b => b.dataset.dd === a.dd);
+    $('presetNote').textContent = (PRESETS[a.preset] || PRESETS.custom).note + ' Controleer de regels altijd in je eigen dashboard.';
+    // phase buttons
+    const seg = $('phaseSeg'); seg.innerHTML = '';
+    (a.targets||[10]).forEach((t,i) => { const b = document.createElement('button'); b.type='button'; b.textContent = `F${i+1} · ${fmt(num(t),0)}%`;
+      b.setAttribute('aria-pressed', (a.phase||1)===i+1); b.onclick = () => { a.phase = i+1; save(); fillAcct(); calc(); }; seg.appendChild(b); });
   }
   function loadTrade(){
     const t = st.trade[st.sym], ex = SYM[st.sym].ex;
@@ -491,15 +655,15 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
   function applyUI(){
     document.documentElement.dataset.sym = st.sym;
     document.documentElement.dataset.theme = st.theme;
-    $('symXAU').setAttribute('aria-pressed', st.sym==='XAU'); $('symEUR').setAttribute('aria-pressed', st.sym==='EUR');
+    setPressed('[data-sym]', b => b.dataset.sym === st.sym);
     $('slModePrice').setAttribute('aria-pressed', st.slMode==='price'); $('slModeDist').setAttribute('aria-pressed', st.slMode==='dist');
-    $('ph1').setAttribute('aria-pressed', st.phase===1); $('ph2').setAttribute('aria-pressed', st.phase===2);
     setPressed('[data-th]', b => b.dataset.th === st.theme);
     $('nfSym').setAttribute('aria-pressed', st.newsFilter==='sym'); $('nfAll').setAttribute('aria-pressed', st.newsFilter==='all');
+    $('lfDay').setAttribute('aria-pressed', st.logFilter==='day'); $('lfAll').setAttribute('aria-pressed', st.logFilter==='all');
     const S = SYM[st.sym];
     $('slLabel').textContent = st.slMode==='price' ? 'Stop-loss (prijs)' : (st.sym==='XAU' ? 'SL-afstand ($)' : 'SL-afstand (pips)');
     $('slQuick').innerHTML = '';
-    S.quick.forEach(q => { const b=document.createElement('button'); b.type='button'; b.className='pill'; b.textContent = st.sym==='XAU' ? `$${q}` : `${q} pips`;
+    S.quick.forEach(q => { const b=document.createElement('button'); b.type='button'; b.className='pill'; b.dataset.q = q; b.textContent = st.sym==='XAU' ? `$${q}` : `${q} pips`;
       b.onclick = () => { const e=num($('entry').value); const d = st.sym==='XAU'? q : q*S.pip;
         if (st.slMode==='dist') $('sl').value = String(q);
         else if (isFinite(e)) { const tp=num($('tp').value); const long = !(isFinite(tp) && tp<e); $('sl').value = (long? e-d : e+d).toFixed(S.dec); }
@@ -509,76 +673,72 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     tm.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0e1116');
   }
 
+  // ---------- accounts list ----------
+  function accRow(a, onPick){
+    const A = nums(a), s = statusOf(a);
+    const b = document.createElement('button'); b.type='button'; b.className='acc-row'; b.setAttribute('aria-current', a.id===st.active);
+    const tgtTxt = A.bal >= A.tgt ? 'doel behaald' : `doel ${fmt(Math.max(0,A.prog)*100,0)}%`;
+    b.innerHTML = `<i class="st-dot ${s}"></i><span class="nm">${esc(a.name)}<span class="sub">F${A.ph} · balance ${usd(A.bal,0)}</span></span><span class="rt">${usd(A.dailyLeft,0)}<small>dagruimte · ${tgtTxt}</small></span>`;
+    b.onclick = () => onPick(a); return b;
+  }
+  function renderAccounts(){
+    const box = $('accList'); box.innerHTML = '';
+    st.accounts.forEach(a => box.appendChild(accRow(a, x => switchAcc(x.id))));
+    const tot = st.accounts.reduce((s,a) => s + (num(a.bal) - (num(a.init)||0)), 0);
+    $('accTotal').textContent = `${st.accounts.length} account${st.accounts.length>1?'s':''} · ${tot>=0?'+':''}${usd(tot,0)}`;
+    const a = acc(); $('acctName').textContent = a.name; $('acctDot').className = 'st-dot ' + statusOf(a);
+    $('actTitle').textContent = a.name;
+  }
+  function switchAcc(id){ persistTradeOnly(); st.active = id; save(); fillAcct(); calc(); closeSheets(); toast(acc().name); }
+
   // ---------- core calc ----------
   let last = {};
-  function acctNums(){
-    const a = st.acct;
-    const init = num(a.init) || 10000, bal = num(a.bal), ds = num(a.dayStart);
-    const opl = isFinite(num(a.openPL)) ? num(a.openPL) : 0, comm = isFinite(num(a.comm)) ? num(a.comm) : 0;
-    const equity = bal + opl;
-    const dailyAllow = Math.min(init, ds) * DAILY_PCT, dailyFloor = ds - dailyAllow, dailyLeft = equity - dailyFloor;
-    const maxFloor = init*(1-MAX_PCT), maxLeft = equity - maxFloor;
-    const tgtPct = st.phase===1 ? .08 : .05, tgt = init*(1+tgtPct), prog = (bal-init)/(tgt-init);
-    return {init,bal,ds,opl,comm,equity,dailyAllow,dailyFloor,dailyLeft,maxFloor,maxLeft,tgtPct,tgt,prog};
-  }
   const paint = (el, f) => { f=Math.max(0,Math.min(1,f)); el.style.width=(f*100)+'%'; el.className = f<.25?'bad':f<.5?'warn':''; };
-
-  function lockState(A){
-    const today = dayKey();
-    const todays = st.log.filter(t => t.dayKey===today);
-    const losses = todays.filter(t => t.pl < 0).length;
-    const lossAmt = Math.max(0, A.ds - A.equity);
-    const pct = num(st.stop.pct), maxL = parseInt(st.stop.losses,10);
-    let why = null;
-    if (A.dailyLeft <= 0) why = 'Je hebt de dagelijkse limiet van Alpha bereikt.';
-    else if (isFinite(pct) && pct>0 && lossAmt >= A.init*pct/100) why = `Je zit vandaag op ${usd(-lossAmt)} verlies. Je eigen grens is ${fmt(pct,1)}% (${usd(A.init*pct/100)}).`;
-    else if (isFinite(maxL) && maxL>0 && losses >= maxL) why = `${losses} verliestrades vandaag. Je eigen grens is ${maxL}.`;
-    return { locked: !!why && st.stop.unlockedKey !== today, why, todays, losses };
-  }
-
   function calc(){
-    const S = SYM[st.sym], A = acctNums();
-    // header gauges
-    $('gDay').textContent = usd(A.dailyLeft,0); paint($('gDayBar'), A.dailyLeft/A.dailyAllow);
-    $('gMax').textContent = usd(A.maxLeft,0); paint($('gMaxBar'), A.maxLeft/(A.init*MAX_PCT));
-    $('gTgtK').textContent = `Doel F${st.phase}`;
+    const a = acc(), S = SYM[st.sym], A = nums(a);
+    const rr = nextReset(a), rmin = Math.max(0, Math.round((rr-new Date())/60e3));
+    $('resetTxt').textContent = `Reset ${hm(rr)} · ${Math.floor(rmin/60)}u${String(rmin%60).padStart(2,'0')}`;
+    $('gDayK').textContent = `Dag · ${fmt(num(a.daily),0)}%`; $('gMaxK').textContent = `Max DD · ${fmt(num(a.max),0)}%`;
+    $('gDay').textContent = usd(A.dailyLeft,0); paint($('gDayBar'), A.dailyLeft/(A.dailyAllow||1));
+    $('gMax').textContent = usd(A.maxLeft,0); paint($('gMaxBar'), A.maxLeft/(A.init*A.mPct||1));
+    $('gTgtK').textContent = `Doel F${A.ph}`;
     $('gTgt').textContent = A.bal >= A.tgt ? 'Behaald' : usd(A.tgt-A.bal,0);
     $('gTgtBar').style.width = (Math.max(0,Math.min(1,A.prog))*100)+'%';
 
-    // account tab
-    $('aEq').textContent = usd(A.equity); $('aDayFloor').textContent = usd(A.dailyFloor); $('aMaxFloor').textContent = usd(A.maxFloor);
-    $('aTgt').textContent = `${usd(A.tgt)} · ${fmt(Math.max(0,A.prog)*100,0)}%`; $('ruleFloor').textContent = usd(A.maxFloor,0);
-    const days = new Set(st.log.filter(t=>t.phase===st.phase).map(t=>t.dayKey)).size;
-    $('aDays').textContent = `${days} / 3${days>=3?' ✓':''}`;
+    $('aEq').textContent = usd(A.equity);
+    $('aDayK').textContent = `Ondergrens vandaag (${fmt(num(a.daily),0)}%)`; $('aDayFloor').textContent = usd(A.dailyFloor);
+    $('aMaxK').textContent = `Ondergrens max DD (${fmt(num(a.max),0)}%, ${DD_LABEL[a.dd]||'statisch'})`; $('aMaxFloor').textContent = usd(A.maxFloor);
+    $('aTgt').textContent = `${usd(A.tgt)} · ${fmt(Math.max(0,A.prog)*100,0)}%`;
+    const days = new Set(st.log.filter(t=>t.acc===a.id && t.phase===A.ph).map(t=>t.dayKey)).size, need = parseInt(a.days,10)||0;
+    $('aDays').textContent = need ? `${days} / ${need}${days>=need?' ✓':''}` : `${days}`;
+    const tpl = A.bal - A.init; $('aPL').textContent = `${tpl>=0?'+':''}${usd(tpl)} (${fmt(tpl/A.init*100)}%)`;
+    renderRules(a, A);
 
-    // lock
-    const L = lockState(A);
+    const L = lockState(a, A);
     $('lockBox').hidden = !L.locked; $('tradeBox').hidden = L.locked;
     $('dock').hidden = L.locked || $('tab-trade').hidden;
-    if (L.locked) { $('lockWhy').textContent = L.why; $('lockUntil').textContent = `Weer open na de dagreset om ${hm(nextReset())}.`; }
+    if (L.locked) { $('lockWhy').textContent = `${a.name}: ${L.why}`; $('lockUntil').textContent = `Weer open na de dagreset om ${hm(nextReset(a))}. Wissel bovenaan van account als je op een ander account wilt handelen.`; }
 
-    // trade
     const rp = num($('riskPct').value), riskUsd = A.init*rp/100;
-    $('riskHint').textContent = isFinite(riskUsd) ? `${usd(riskUsd)}` : '–';
+    $('riskHint').textContent = isFinite(riskUsd) ? `${usd(riskUsd)} van ${usd(A.init,0)}` : '–';
     setPressed('.pill[data-r]', b => num(b.dataset.r) === rp);
     const entry = num($('entry').value), slIn = num($('sl').value), tp = num($('tp').value);
     let dist = NaN, dir = null;
     if (st.slMode==='price') { if (isFinite(entry)&&isFinite(slIn)&&entry!==slIn){ dist=Math.abs(entry-slIn); dir = slIn<entry?'long':'short'; } }
     else if (isFinite(slIn)&&slIn>0) { dist = st.sym==='XAU' ? slIn : slIn*S.pip; if (isFinite(entry)&&isFinite(tp)&&tp!==entry) dir = tp>entry?'long':'short'; }
-    setPressed('#slQuick .pill', b => { const q=num(b.textContent.replace('$','')); return isFinite(dist) && Math.abs((st.sym==='XAU'?q:q*S.pip)-dist) < S.pip/10; });
+    setPressed('#slQuick .pill', b => { const q=num(b.dataset.q); return isFinite(dist) && Math.abs((st.sym==='XAU'?q:q*S.pip)-dist) < S.pip/10; });
 
     const alerts = []; const lossPerLot = dist*S.contract + A.comm;
     let lots = NaN, risk = NaN;
     if (isFinite(dist) && isFinite(riskUsd) && riskUsd>0) {
       lots = Math.floor(riskUsd/lossPerLot*100 + 1e-9)/100;
-      const maxLots = MAX_LOTS_PER_10K*A.init/10000;
-      if (lots > maxLots) { alerts.push(['bad',`Boven het maximum van ${fmt(maxLots)} lot. Begrensd.`]); lots = Math.floor(maxLots*100)/100; }
+      if (lots > A.maxLots) { alerts.push(['bad',`Boven het maximum van ${fmt(A.maxLots)} lot voor dit account. Begrensd.`]); lots = Math.floor(A.maxLots*100)/100; }
       if (lots < .01) { alerts.push(['bad',`Stop te ruim: 0,01 lot riskeert al ${usd(lossPerLot*.01)}.`]); lots = 0; }
       risk = lots*lossPerLot;
     }
     $('lots').textContent = isFinite(lots) ? fmt(lots) : '–';
     const d = $('dir'); d.className = 'dir ' + (dir||'none'); d.textContent = dir==='long'?'BUY':dir==='short'?'SELL':(st.slMode==='dist'?'Richting via TP':'–');
-    $('dRisk').textContent = isFinite(risk) ? usd(risk) : '–';
+    $('dRisk').textContent = isFinite(risk) ? 'risico ' + usd(risk,0) : '–';
     $('rRisk').textContent = isFinite(risk) ? `${usd(risk)} (${fmt(risk/A.init*100)}%)` : '–';
     $('rDist').textContent = isFinite(dist) ? (st.sym==='XAU' ? `$${fmt(dist)} · ${fmt(dist/S.pip,0)} pips` : `${fmt(dist/S.pip,1)} pips`) : '–';
 
@@ -594,83 +754,107 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
       else if (after < A.dailyAllow*.25) alerts.push(['warn',`Na verlies nog maar ${usd(after)} dagruimte.`]);
       if (risk >= A.maxLeft) alerts.push(['bad',`SL raakt de max drawdown (${usd(A.maxFloor)}).`]);
     } else $('rAfter').textContent='–';
-    if (rp>1) alerts.push(['warn',`${fmt(rp)}% per trade is hoog bij 4% dagelijkse limiet.`]);
+    if (rp>1) alerts.push(['warn',`${fmt(rp)}% per trade is hoog bij een daglimiet van ${fmt(num(a.daily),0)}%.`]);
     if (newsNow) alerts.unshift(['bad', newsNow]);
     if (!alerts.length && lots>0) alerts.push(['ok','Binnen je dag- en drawdownlimieten.']);
     $('alerts').innerHTML=''; alerts.forEach(([k,t])=>{ const el=document.createElement('div'); el.className='alert '+k; el.textContent=t; $('alerts').appendChild(el); });
-    const worst = alerts.some(a=>a[0]==='bad') ? 'bad' : alerts.some(a=>a[0]==='warn') ? 'warn' : (lots>0?'ok':'');
+    const worst = alerts.some(x=>x[0]==='bad') ? 'bad' : alerts.some(x=>x[0]==='warn') ? 'warn' : (lots>0?'ok':'');
     $('dockIn').className = 'dock-in ' + worst;
     $('logBtn').disabled = !(lots>0);
 
     // partial
     const tp1 = num($('tp1').value), pct = st.partial.pct;
     setPressed('.pill[data-p]', b => num(b.dataset.p)===pct);
+    const pIds = ['pClose','pLocked','pRem','pBE','pFree'];
     if (lots>=.02 && isFinite(tp1) && isFinite(entry) && dir) {
       let close = Math.floor(lots*pct/100*100+1e-9)/100; if (close<.01) close=.01; if (close>=lots) close = Math.round((lots-.01)*100)/100;
       const rem = Math.round((lots-close)*100)/100;
       const okSide = (dir==='long'&&tp1>entry)||(dir==='short'&&tp1<entry);
-      if (!okSide) { ['pClose','pLocked','pRem','pBE','pFree'].forEach(i=>$(i).textContent='–'); $('pLocked').textContent='TP1 aan verkeerde kant'; }
+      if (!okSide) { pIds.forEach(i=>$(i).textContent='–'); $('pLocked').textContent='TP1 aan verkeerde kant'; }
       else {
         const locked = close*Math.abs(tp1-entry)*S.contract - close*A.comm;
         const freeD = locked/(rem*S.contract), free = dir==='long' ? entry-freeD : entry+freeD;
         $('pClose').textContent = `${fmt(close)} lot`; $('pLocked').textContent = usd(locked); $('pRem').textContent = `${fmt(rem)} lot`;
         $('pBE').textContent = `${fmt(entry,S.dec)} · winst ≥ ${usd(locked)}`; $('pFree').textContent = fmt(free,S.dec);
       }
-    } else { ['pClose','pLocked','pRem','pBE','pFree'].forEach(i=>$(i).textContent='–'); if (lots>0 && lots<.02) $('pClose').textContent='Min. 0,02 lot nodig'; }
+    } else { pIds.forEach(i=>$(i).textContent='–'); if (lots>0 && lots<.02) $('pClose').textContent='Min. 0,02 lot nodig'; }
 
     last = {lots, risk, tpProfit, dir};
-    // log list
-    renderLog(L.todays);
+    renderLog(a);
+    renderAccounts();
   }
 
-  function renderLog(todays){
+  function renderRules(a, A){
+    const r = [
+      `Dagelijkse limiet ${fmt(num(a.daily),0)}%: equity vandaag niet onder ${usd(A.dailyFloor)}. Open posities tellen mee.`,
+      `Max drawdown ${fmt(num(a.max),0)}% (${DD_LABEL[a.dd]||'statisch'}): equity nooit onder ${usd(A.maxFloor)}.`,
+      `Winstdoelen: ${A.targets.map((t,i)=>`fase ${i+1} ${fmt(num(t),0)}%`).join(', ')}.`,
+      (parseInt(a.days,10)||0) ? `Minimaal ${a.days} handelsdagen per fase.` : 'Geen minimum aantal handelsdagen ingesteld.',
+      isFinite(A.maxLots) ? `Max ${fmt(A.maxLots)} lots open bij dit account.` : 'Geen max lots ingesteld.',
+      `Dagreset ${a.reset==='nl' ? 'middernacht Nederlandse tijd' : '00:00 GMT+3'} (volgende: ${hm(nextReset(a))}).`,
+      (PRESETS[a.preset]||PRESETS.custom).note
+    ];
+    $('rulesList').innerHTML = r.map(x => `<li>${esc(x)}</li>`).join('');
+  }
+
+  function renderLog(a){
     const box = $('logList'); box.innerHTML = '';
-    if (!todays.length) { box.innerHTML = '<p class="hint" style="margin:0">Nog geen trades vandaag. Log een trade via de knop “Loggen” op het tradescherm.</p>'; $('logSum').textContent=''; return; }
-    let sum = 0;
-    todays.slice().reverse().forEach(t => { sum += t.pl;
+    const today = dayKey(a);
+    let rows = st.log.filter(t => t.acc === a.id);
+    if (st.logFilter === 'day') rows = rows.filter(t => t.dayKey === today);
+    const wins = rows.filter(t=>t.pl>0).length, losses = rows.filter(t=>t.pl<0).length, sum = rows.reduce((s,t)=>s+t.pl,0);
+    $('logStats').innerHTML = rows.length ? `<span>${rows.length} trades</span><span>winrate ${fmt(wins+losses ? wins/(wins+losses)*100 : 0,0)}%</span><span>${sum>=0?'+':''}${usd(sum)}</span>` : '';
+    if (!rows.length) { box.innerHTML = `<p class="hint" style="margin:0">${st.logFilter==='day' ? 'Nog geen trades vandaag op dit account.' : 'Nog geen trades op dit account.'} Log een trade via “Loggen” op het tradescherm.</p>`; return; }
+    let curDay = null;
+    rows.slice().sort((x,y)=>y.t-x.t).forEach(t => {
+      if (st.logFilter === 'all' && t.dayKey !== curDay) {
+        curDay = t.dayKey; const dsum = rows.filter(z=>z.dayKey===curDay).reduce((s,z)=>s+z.pl,0);
+        const h = document.createElement('div'); h.className = 'daygrp';
+        h.innerHTML = `<span>${new Date(curDay+'T12:00:00Z').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'})}</span><span class="num">${dsum>=0?'+':''}${usd(dsum)}</span>`;
+        box.appendChild(h);
+      }
       const r = document.createElement('div'); r.className='lr';
-      r.innerHTML = `<span class="num hint">${hm(new Date(t.t))}</span><span>${t.sym==='XAU'?'XAUUSD':'EURUSD'} <span class="hint">${t.dir==='long'?'buy':t.dir==='short'?'sell':''} ${fmt(t.lots)}</span></span><span class="num pl ${t.pl>0?'pos':t.pl<0?'neg':''}">${usd(t.pl)}</span>`;
+      r.innerHTML = `<span class="num hint">${hm(new Date(t.t))}</span><span>${(SYM[t.sym]||SYM.XAU).name} <span class="hint">${t.dir==='long'?'buy':t.dir==='short'?'sell':''} ${fmt(t.lots)}</span></span><span class="num pl ${t.pl>0?'pos':t.pl<0?'neg':''}">${usd(t.pl)}</span>`;
       const x = document.createElement('button'); x.className='x'; x.type='button'; x.setAttribute('aria-label','Trade verwijderen'); x.textContent='✕';
-      x.onclick = () => { st.log = st.log.filter(z=>z.id!==t.id); st.acct.bal = String(Math.round((num(st.acct.bal)-t.pl)*100)/100); save(); fillAcct(); calc(); toast('Trade verwijderd'); };
-      r.appendChild(x); box.appendChild(r); });
-    $('logSum').textContent = usd(sum);
+      x.onclick = () => { st.log = st.log.filter(z=>z.id!==t.id); a.bal = String(Math.round((num(a.bal)-t.pl)*100)/100); save(); fillAcct(); calc(); toast('Trade verwijderd'); };
+      r.appendChild(x); box.appendChild(r);
+    });
   }
 
   // ---------- news ----------
-  let events = [], newsNow = null;
+  let events = [], newsNow = null, newsLoaded = false;
   const XAU_CUR = ['USD','EUR','GBP','AUD','CAD'];
   const KEYW = /rate|cpi|inflation|gdp|pce|pmi|employment|payroll|unemployment|jobs/i;
-  const rel = e => ({ XAU: XAU_CUR.includes(e.cur) || KEYW.test(e.title), EUR: e.cur==='USD' || e.cur==='EUR' });
+  const rel = e => ({ XAU: XAU_CUR.includes(e.cur) || KEYW.test(e.title), EUR: e.cur==='USD' || e.cur==='EUR', GBP: e.cur==='USD' || e.cur==='GBP' });
+  const CAL_URLS = ['https://raw.githubusercontent.com/BenjaminMaltha/Lotzize-callculator-10k-prop/main/calendar.json','calendar.json'];
   async function loadNews(){
     let data = null;
     for (const u of CAL_URLS) { try { const r = await fetch(u + '?t=' + Date.now(), {cache:'no-store'}); if (r.ok) { data = await r.json(); break; } } catch(e){} }
     if (data) { try { localStorage.setItem('alphaRiskDesk.cal', JSON.stringify(data)); } catch(e){} }
     else { try { data = JSON.parse(localStorage.getItem('alphaRiskDesk.cal')||'null'); } catch(e){} }
     events = Array.isArray(data) ? data.filter(e => e && e.impact==='High' && e.date).map(e => ({ t:new Date(e.date), cur:e.country, title:e.title, fc:e.forecast, pv:e.previous }))
-      .filter(e => !isNaN(e.t)).sort((a,b)=>a.t-b.t) : [];
+      .filter(e => !isNaN(e.t)).sort((x,y)=>x.t-y.t) : [];
     events.forEach(e => e.rel = rel(e));
     newsLoaded = data !== null;
-    renderNews();
+    renderNews(); calc();
   }
-  let newsLoaded = false;
   function renderNews(){
     const now = Date.now(), mine = events.filter(e => e.rel[st.sym]);
     const inWin = mine.find(e => now >= e.t - 15*60e3 && now <= +e.t + 30*60e3);
     const next = mine.find(e => +e.t > now);
-    const b = $('newsBanner'); let cls = '', txt;
-    if (!newsLoaded) { txt = 'Nieuwskalender nog niet beschikbaar. Draai de workflow in GitHub (zie uitleg).'; }
-    else if (inWin) { cls='bad'; txt = `<b>Niet handelen</b> · ${inWin.cur} ${inWin.title} om ${hm(inWin.t)} (venster tot ${hm(new Date(+inWin.t+30*60e3))})`; }
+    let cls = '', txt;
+    if (!newsLoaded) txt = 'Nieuwskalender nog niet beschikbaar. Draai de workflow in GitHub.';
+    else if (inWin) { cls='bad'; txt = `<b>Niet handelen</b> · ${esc(inWin.cur)} ${esc(inWin.title)} om ${hm(inWin.t)} (venster tot ${hm(new Date(+inWin.t+30*60e3))})`; }
     else if (next) { const mins = Math.round((next.t-now)/60e3);
       const when = mins < 60 ? `over ${mins} min` : mins < 24*60 ? `om ${hm(next.t)}` : next.t.toLocaleDateString('nl-NL',{timeZone:TZ,weekday:'short'}) + ' ' + hm(next.t);
-      cls = mins <= 60 ? 'warn' : 'ok'; txt = `${mins<=60?'<b>Let op</b> · ':'Volgende: '}${next.cur} ${next.title} ${when}`; }
-    else { cls='ok'; txt = 'Geen high-impact nieuws meer deze week voor dit paar.'; }
-    b.className = 'news ' + cls; $('newsTxt').innerHTML = txt;
+      cls = mins <= 60 ? 'warn' : 'ok'; txt = `${mins<=60?'<b>Let op</b> · ':'Volgende: '}${esc(next.cur)} ${esc(next.title)} ${when}`; }
+    else { cls='ok'; txt = `Geen high-impact nieuws meer deze week voor ${SYM[st.sym].name}.`; }
+    $('newsBanner').className = 'news ' + cls; $('newsTxt').innerHTML = txt;
     newsNow = inWin ? `Nieuwsvenster actief: ${inWin.cur} ${inWin.title} (${hm(inWin.t)}).` : null;
     $('newsBadge').hidden = !(inWin || (next && next.t-now <= 60*60e3));
 
-    // list
     const list = $('newsList'); list.innerHTML = '';
-    const shown = st.newsFilter==='all' ? events : events.filter(e => e.rel.XAU || e.rel.EUR);
+    const shown = st.newsFilter==='all' ? events : events.filter(e => e.rel.XAU || e.rel.EUR || e.rel.GBP);
     if (!shown.length) { list.innerHTML = `<p class="hint">${newsLoaded ? 'Geen high-impact events gevonden deze week.' : 'Nog geen kalender geladen.'}</p>`; return; }
     let curDay = null, box;
     shown.forEach(e => {
@@ -678,29 +862,50 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
       if (dk !== curDay) { curDay = dk; box = document.createElement('div'); box.className='day'; box.innerHTML = `<h3>${dk}</h3>`; list.appendChild(box); }
       const past = now > +e.t + 30*60e3, active = now >= e.t-15*60e3 && !past;
       const row = document.createElement('div'); row.className = 'ev' + (past?' past':'') + (active?' now':'');
-      const tags = (e.rel.XAU?'<span class="tag">XAU</span>':'') + (e.rel.EUR?'<span class="tag">EUR</span>':'');
+      const tags = SYMS.filter(k => e.rel[k]).map(k => `<span class="tag">${k}</span>`).join('');
       const extra = [e.fc?`verw. ${e.fc}`:'', e.pv?`vorig ${e.pv}`:''].filter(Boolean).join(' · ');
-      row.innerHTML = `<span class="t">${hm(e.t)}</span><span class="cur">${e.cur}</span><span>${escapeHtml(e.title)}${tags}<span class="sub">Niet handelen ${hm(new Date(e.t-15*60e3))}–${hm(new Date(+e.t+30*60e3))}${extra?' · '+escapeHtml(extra):''}</span></span>`;
+      row.innerHTML = `<span class="t">${hm(e.t)}</span><span class="cur">${esc(e.cur)}</span><span>${esc(e.title)}${tags}<span class="sub">Niet handelen ${hm(new Date(e.t-15*60e3))}–${hm(new Date(+e.t+30*60e3))}${extra?' · '+esc(extra):''}</span></span>`;
       box.appendChild(row);
     });
   }
-  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // ---------- persistence of inputs ----------
-  function persist(){
-    st.acct = { init:$('initBal').value, bal:$('bal').value, dayStart:$('dayStart').value, openPL:$('openPL').value, comm:$('comm').value };
-    st.stop.pct = $('stopPct').value; st.stop.losses = $('stopLoss').value;
+  function persistTradeOnly(){
     st.trade[st.sym] = { entry:$('entry').value, sl:$('sl').value, tp:$('tp').value };
     st.riskPct = $('riskPct').value; st.partial.tp1 = $('tp1').value;
-    save();
   }
-  document.querySelectorAll('input[type=text]').forEach(el => el.addEventListener('input', () => { if (el.id==='plIn') return; persist(); calc(); }));
+  function persist(){
+    const a = acc();
+    a.bal = $('bal').value; a.dayStart = $('dayStart').value; a.openPL = $('openPL').value; bumpPeak(a);
+    st.stop.pct = $('stopPct').value; st.stop.losses = $('stopLoss').value;
+    persistTradeOnly(); save();
+  }
+  ['bal','dayStart','openPL','stopPct','stopLoss','riskPct','entry','sl','tp','tp1'].forEach(id => $(id).addEventListener('input', () => { persist(); calc(); }));
+
+  // account settings form
+  const setField = (id, fn) => $(id).addEventListener('input', () => { fn(acc(), $(id).value); save(); calc(); });
+  setField('sName', (a,v) => a.name = v.trim() || 'Account');
+  setField('sInit', (a,v) => { a.init = v; });
+  setField('sComm', (a,v) => a.comm = v);
+  setField('sDaily', (a,v) => a.daily = v);
+  setField('sMax', (a,v) => a.max = v);
+  setField('sDays', (a,v) => a.days = v);
+  setField('sLots', (a,v) => a.lots = v.trim()==='' ? null : v);
+  $('sTargets').addEventListener('input', () => { const a = acc(); const t = $('sTargets').value.split(/[;,\s]+/).map(num).filter(x=>isFinite(x)&&x>0);
+    if (t.length) { a.targets = t; if (a.phase > t.length) a.phase = t.length; save(); fillAcct(); calc(); } });
+  $('sReset').onchange = () => { const a = acc(); a.reset = $('sReset').value; a.dayKey = dayKey(a); save(); calc(); };
+  document.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => { acc().dd = b.dataset.dd; save(); fillAcct(); calc(); });
+  $('sPreset').onchange = () => { const a = acc(), p = PRESETS[$('sPreset').value]; if (!p) return;
+    Object.assign(a, { preset: $('sPreset').value, daily:p.daily, max:p.max, dd:p.dd, targets:p.targets.slice(), days:p.days, lots:p.lots, reset:p.reset });
+    if (a.phase > a.targets.length) a.phase = a.targets.length; a.dayKey = dayKey(a); save(); fillAcct(); calc(); toast('Regels bijgewerkt'); };
+
+  // presets in selects
+  ['sPreset','nPreset'].forEach(id => { $(id).innerHTML = Object.entries(PRESETS).map(([k,p]) => `<option value="${k}">${esc(p.label)}</option>`).join(''); });
 
   // ---------- events ----------
   document.querySelectorAll('.pill[data-r]').forEach(b => b.onclick = () => { $('riskPct').value = b.dataset.r; persist(); calc(); });
   document.querySelectorAll('.pill[data-p]').forEach(b => b.onclick = () => { st.partial.pct = num(b.dataset.p); save(); calc(); });
-  function setSym(s){ persist(); st.sym = s; save(); loadTrade(); applyUI(); renderNews(); calc(); }
-  $('symXAU').onclick = () => setSym('XAU'); $('symEUR').onclick = () => setSym('EUR');
+  document.querySelectorAll('[data-sym]').forEach(b => b.onclick = () => { persistTradeOnly(); st.sym = b.dataset.sym; save(); loadTrade(); applyUI(); renderNews(); calc(); });
   function setSlMode(m){
     if (m===st.slMode) return; const S=SYM[st.sym], e=num($('entry').value), v=num($('sl').value);
     if (m==='dist' && isFinite(e)&&isFinite(v)) $('sl').value = st.sym==='XAU' ? Math.abs(e-v).toFixed(2) : (Math.abs(e-v)/S.pip).toFixed(1);
@@ -708,78 +913,98 @@ nav.tabs .badge{position:absolute;top:9px;left:calc(50% + 6px);width:8px;height:
     st.slMode = m; applyUI(); persist(); calc();
   }
   $('slModePrice').onclick = () => setSlMode('price'); $('slModeDist').onclick = () => setSlMode('dist');
-  $('ph1').onclick = () => { st.phase=1; save(); applyUI(); calc(); }; $('ph2').onclick = () => { st.phase=2; save(); applyUI(); calc(); };
   document.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { st.theme = b.dataset.th; save(); applyUI(); });
   $('nfSym').onclick = () => { st.newsFilter='sym'; save(); applyUI(); renderNews(); };
   $('nfAll').onclick = () => { st.newsFilter='all'; save(); applyUI(); renderNews(); };
+  $('lfDay').onclick = () => { st.logFilter='day'; save(); applyUI(); calc(); };
+  $('lfAll').onclick = () => { st.logFilter='all'; save(); applyUI(); calc(); };
 
-  // tabs
   function setTab(t){
     ['trade','news','acct'].forEach(k => $('tab-'+k).hidden = k!==t);
     document.querySelectorAll('nav.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab===t));
-    $('dock').hidden = t!=='trade'; document.body.classList.toggle('tab-trade', t==='trade');
-    window.scrollTo(0,0);
+    document.body.classList.toggle('tab-trade', t==='trade');
+    calc(); window.scrollTo(0,0);
   }
   document.querySelectorAll('nav.tabs [data-tab]').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
-  // copy
   $('copyLots').onclick = async () => {
     if (!(last.lots>0)) return; const txt = last.lots.toFixed(2);
     try { await navigator.clipboard.writeText(txt); toast(`${txt} gekopieerd`); }
     catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); toast(`${txt} gekopieerd`);}catch(_){toast(txt);} ta.remove(); }
   };
 
+  // sheets
+  function openSheet(id){ closeSheets(); $('scrim').hidden = false; $(id).hidden = false; }
+  function closeSheets(){ ['sheet','pickSheet','newSheet'].forEach(id => $(id).hidden = true); $('scrim').hidden = true; }
+  $('scrim').onclick = closeSheets;
+
+  // account picker
+  $('acctBtn').onclick = () => { const box = $('pickList'); box.innerHTML = ''; st.accounts.forEach(a => box.appendChild(accRow(a, x => switchAcc(x.id)))); openSheet('pickSheet'); };
+  // new account
+  function fillNewPhase(){ const p = PRESETS[$('nPreset').value] || PRESETS.custom;
+    $('nPhase').innerHTML = p.targets.map((t,i)=>`<option value="${i+1}">Fase ${i+1} · doel ${t}%</option>`).join('');
+    $('nNote').textContent = `${p.daily}% dagelijkse limiet, ${p.max}% max drawdown (${DD_LABEL[p.dd]}). ${p.note}`; }
+  function openNew(){ $('nPreset').value = acc().preset in PRESETS ? acc().preset : 'alpha-pro-8'; $('nSize').value = '10000'; $('nBal').value = ''; $('nName').value = ''; fillNewPhase(); openSheet('newSheet'); }
+  $('nPreset').onchange = fillNewPhase;
+  $('addAcc').onclick = openNew; $('pickAdd').onclick = openNew; $('newCancel').onclick = closeSheets;
+  $('newSave').onclick = () => {
+    const size = num($('nSize').value); if (!(size>0)) { toast('Vul een accountgrootte in'); return; }
+    const bal = num($('nBal').value), presetId = $('nPreset').value, p = PRESETS[presetId];
+    let name = $('nName').value.trim();
+    if (!name) { const base = `${p.short} · ${fmt(size/1000,0)}K`; const n = st.accounts.filter(a => a.name.startsWith(base)).length; name = n ? `${base} #${n+1}` : base; }
+    const a = newAccount(presetId, size, parseInt($('nPhase').value,10)||1, isFinite(bal)&&bal>0 ? bal : size, name);
+    a.dayKey = dayKey(a);
+    persistTradeOnly(); st.accounts.push(a); st.active = a.id; save(); fillAcct(); calc(); closeSheets(); toast('Account toegevoegd');
+  };
+  // delete account
+  $('delAcc').onclick = () => { if (st.accounts.length < 2) { toast('Je hebt minimaal één account nodig'); return; } $('delConfirm').hidden = false; $('delAcc').hidden = true; };
+  $('delNo').onclick = () => { $('delConfirm').hidden = true; $('delAcc').hidden = false; };
+  $('delYes').onclick = () => { const id = st.active; st.accounts = st.accounts.filter(a => a.id !== id); st.log = st.log.filter(t => t.acc !== id);
+    st.active = st.accounts[0].id; save(); $('delNo').onclick(); fillAcct(); calc(); toast('Account verwijderd'); };
+
   // log sheet
-  let sheetRes = null;
-  function openSheet(){
+  $('logBtn').onclick = () => {
     if (!(last.lots>0)) return;
-    $('sheetInfo').textContent = `${st.sym==='XAU'?'XAUUSD':'EURUSD'} · ${last.dir==='long'?'buy':last.dir==='short'?'sell':''} ${fmt(last.lots)} lot`;
-    sheetRes = null; setPressed('[data-res]', ()=>false); $('plIn').value = '';
-    $('scrim').hidden = false; $('sheet').hidden = false;
-  }
-  function closeSheet(){ $('scrim').hidden = true; $('sheet').hidden = true; }
-  $('logBtn').onclick = openSheet; $('scrim').onclick = closeSheet; $('sheetCancel').onclick = closeSheet;
+    $('sheetInfo').textContent = `${acc().name} · ${SYM[st.sym].name} · ${last.dir==='long'?'buy':last.dir==='short'?'sell':''} ${fmt(last.lots)} lot`;
+    setPressed('[data-res]', ()=>false); $('plIn').value = ''; openSheet('sheet');
+  };
+  $('sheetCancel').onclick = closeSheets;
   document.querySelectorAll('[data-res]').forEach(b => b.onclick = () => {
-    sheetRes = b.dataset.res; setPressed('[data-res]', x => x===b);
-    const v = sheetRes==='loss' ? -last.risk : sheetRes==='be' ? 0 : (isFinite(last.tpProfit) ? last.tpProfit : '');
+    setPressed('[data-res]', x => x===b);
+    const v = b.dataset.res==='loss' ? -last.risk : b.dataset.res==='be' ? 0 : (isFinite(last.tpProfit) ? last.tpProfit : '');
     $('plIn').value = v==='' ? '' : (Math.round(v*100)/100).toFixed(2);
     if (v==='') $('plIn').focus();
   });
   $('sheetSave').onclick = () => {
-    const pl = num($('plIn').value);
+    const pl = num($('plIn').value), a = acc();
     if (!isFinite(pl)) { toast('Vul een resultaat in'); return; }
-    st.log.push({ id: Date.now()+''+Math.random().toString(36).slice(2,6), t: Date.now(), dayKey: dayKey(), phase: st.phase, sym: st.sym, dir: last.dir, lots: last.lots, pl });
-    st.acct.bal = String(Math.round((num(st.acct.bal)+pl)*100)/100);
-    if (st.log.length > 500) st.log = st.log.slice(-500);
-    save(); fillAcct(); closeSheet(); calc(); toast(pl>0?'Win gelogd':pl<0?'Loss gelogd':'Breakeven gelogd');
+    st.log.push({ id: uid(), t: Date.now(), acc: a.id, dayKey: dayKey(a), phase: nums(a).ph, sym: st.sym, dir: last.dir, lots: last.lots, pl });
+    a.bal = String(Math.round((num(a.bal)+pl)*100)/100); bumpPeak(a);
+    if (st.log.length > 2000) st.log = st.log.slice(-2000);
+    save(); fillAcct(); closeSheets(); calc(); toast(pl>0?'Win gelogd':pl<0?'Loss gelogd':'Breakeven gelogd');
   };
 
   // unlock (hold 3s)
-  let holdT, holdStart;
-  const fill = $('unlockFill');
-  function holdStartFn(e){ e.preventDefault(); holdStart = Date.now(); fill.style.transition='width 3s linear'; fill.style.width='100%';
-    holdT = setTimeout(() => { st.stop.unlockedKey = dayKey(); save(); calc(); toast('Ontgrendeld voor vandaag'); holdEnd(); }, 3000); }
+  let holdT; const fill = $('unlockFill');
+  $('unlockBtn').addEventListener('pointerdown', e => { e.preventDefault(); fill.style.transition='width 3s linear'; fill.style.width='100%';
+    holdT = setTimeout(() => { const a = acc(); a.unlockedKey = dayKey(a); save(); calc(); toast('Ontgrendeld voor vandaag'); holdEnd(); }, 3000); });
   function holdEnd(){ clearTimeout(holdT); fill.style.transition='none'; fill.style.width='0'; }
-  $('unlockBtn').addEventListener('pointerdown', holdStartFn);
   ['pointerup','pointerleave','pointercancel'].forEach(ev => $('unlockBtn').addEventListener(ev, holdEnd));
 
   // wipe
   $('wipeBtn').onclick = () => { $('wipeConfirm').hidden = false; $('wipeBtn').hidden = true; };
   $('wipeNo').onclick = () => { $('wipeConfirm').hidden = true; $('wipeBtn').hidden = false; };
-  $('wipeYes').onclick = () => { st = def(); st.dayKey = dayKey(); save(); fillAcct(); loadTrade(); $('riskPct').value = st.riskPct; $('tp1').value=''; applyUI(); calc(); $('wipeNo').onclick(); toast('Gegevens gewist'); };
+  $('wipeYes').onclick = () => { st = def(); const a = newAccount('alpha-pro-8', 10000, 1); a.dayKey = dayKey(a); st.accounts=[a]; st.active=a.id; save();
+    fillAcct(); loadTrade(); $('riskPct').value = st.riskPct; $('tp1').value=''; applyUI(); calc(); $('wipeNo').onclick(); toast('Gegevens gewist'); };
 
-  // clock
   function tick(){
-    rollDay();
-    const r = nextReset(), mins = Math.round((r-new Date())/60e3);
-    $('resetTxt').textContent = `Reset ${hm(r)} · ${Math.floor(mins/60)}u${String(mins%60).padStart(2,'0')}`;
-    $('ruleReset').textContent = hm(r);
+    rollDays();
     renderNews(); calc();
   }
 
   // ---------- init ----------
+  st.accounts.forEach(a => { if (!a.dayKey) a.dayKey = dayKey(a); bumpPeak(a); }); save();
   fillAcct(); loadTrade(); $('riskPct').value = st.riskPct; $('tp1').value = st.partial.tp1 || '';
-  if (!st.dayKey) { st.dayKey = dayKey(); save(); }
   applyUI(); tick(); setInterval(tick, 30000);
   loadNews(); setInterval(loadNews, 15*60e3);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { tick(); loadNews(); } });
